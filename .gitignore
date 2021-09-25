@@ -1,3 +1,9 @@
+# Project specific
+data/human-references/*
+!data/human-references/README.md 
+data/unlabeled_samples/*.json
+!data/unlabeled_samples/README.md 
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

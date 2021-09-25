@@ -1,0 +1,1 @@
+Reference FASTA from https://ftp-trace.ncbi.nih.gov/1000genomes/ftp/technical/reference/GRCh38_reference_genome/

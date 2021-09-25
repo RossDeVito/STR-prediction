@@ -1,0 +1,1 @@
+BED files from https://github.com/HipSTR-Tool/HipSTR-references/tree/master/human
