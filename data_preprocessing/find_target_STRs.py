@@ -7,6 +7,8 @@ import json
 
 import pandas as pd
 from tqdm import tqdm
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 from pyfaidx import Fasta
 
@@ -51,8 +53,12 @@ if __name__ == '__main__':
 		full_seq = ref_genome[chr_str][region.start-1-n_per_side : region.stop+n_per_side]
 		
 		assert pre_seq.seq + str_seq.seq + post_seq.seq == full_seq.seq
+		assert pre_seq.complement.seq + str_seq.complement.seq + post_seq.complement.seq == full_seq.complement.seq
+
+		# add sequence
 		samples.append({
 			'HipSTR_name': region.str_name,
+			'complement': False,
 			'motif': region.motif,
 			'motif_len': region.motif_len,
 			'num_copies': region.num_copies,
@@ -67,6 +73,24 @@ if __name__ == '__main__':
 			'n_per_side': n_per_side
 		})
 
+		# add sequence complement
+		samples.append({
+			'HipSTR_name': region.str_name,
+			'complement': True,
+			'motif': str_seq.complement.seq[:region.motif_len],
+			'motif_len': region.motif_len,
+			'num_copies': region.num_copies,
+			'str_seq': str_seq.complement.seq,
+			'str_seq_name': str_seq.fancy_name,
+			'pre_seq': pre_seq.complement.seq,
+			'pre_seq_name': pre_seq.fancy_name,
+			'post_seq': post_seq.complement.seq,
+			'post_seq_name': post_seq.fancy_name,
+			'full_seq': full_seq.complement.seq,
+			'full_seq_name': full_seq.fancy_name,
+			'n_per_side': n_per_side
+		})
+
 	# Save unlabeled samples to main data dict
 	this_sample_set_fname = 'unlabeled_samples_GRCh38_{}_per_side.json'.format(n_per_side)
 	samples_save_path = os.path.join('..', 'data', 'unlabeled_samples', 
@@ -74,3 +98,7 @@ if __name__ == '__main__':
 
 	with open(samples_save_path, 'w') as fp:
 		json.dump(samples, fp, indent=4)
+
+	# Plot distribution of copy numbers
+	sns.ecdfplot(str_regions.num_copies)
+	plt.show()

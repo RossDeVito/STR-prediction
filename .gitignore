@@ -3,6 +3,9 @@ data/human-references/*
 !data/human-references/README.md 
 data/unlabeled_samples/*.json
 !data/unlabeled_samples/README.md 
+data/ChIP-seq/*
+!data/ChIP-seq/README.md 
+!data/ChIP-seq/*.bed
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
