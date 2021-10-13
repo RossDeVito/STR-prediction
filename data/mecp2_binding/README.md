@@ -1,4 +1,6 @@
-Output from data_preprocessing/find_target_STRs.py.
+Contains data for mecp2 binding task
+
+# Output from data_preprocessing/find_target_STRs.py.
 
 Sample JSON:
 

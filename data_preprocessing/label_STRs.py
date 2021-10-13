@@ -8,7 +8,7 @@ from tqdm import tqdm
 
 if __name__ == '__main__':
 	# Load target STRs to be labeled
-	unlabeled_samp_dir = os.path.join('..', 'data', 'unlabeled_samples')
+	unlabeled_samp_dir = os.path.join('..', 'data', 'mecp2_binding')
 	unlabeled_samp_fname = 'unlabeled_samples_GRCh38_500_per_side.json'
 	unlabeled_samp_path = os.path.join(unlabeled_samp_dir, unlabeled_samp_fname)
 
@@ -17,7 +17,7 @@ if __name__ == '__main__':
 
 	# Load ChIP-seq data
 	chipseq_dir = os.path.join('..', 'data', 'ChIP-seq')
-	peaks_bed_fname = 'GSM3579716_peaks.bed'
+	peaks_bed_fname = 'GSM3579716_GSM3579716_ChIP5_IP_WT_6.bed'
 
 	peaks_df = pd.read_csv(
 		os.path.join(chipseq_dir, peaks_bed_fname), 
@@ -60,3 +60,11 @@ if __name__ == '__main__':
 		samples[i]['label'] = int(is_bound)
 
 	print(bound_counts)
+
+	# Save unlabeled samples to main data dict
+	this_sample_set_fname = 'labeled_samples_GRCh38_500_per_side.json'
+	samples_save_path = os.path.join('..', 'data', 'mecp2_binding', 
+										this_sample_set_fname)
+
+	with open(samples_save_path, 'w') as fp:
+		json.dump(samples, fp, indent=4)

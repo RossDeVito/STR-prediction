@@ -5,7 +5,9 @@ to a JSON file in main data dir.
 import os
 import json
 
+import numpy as np
 import pandas as pd
+from statsmodels.distributions.empirical_distribution import ECDF
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -93,7 +95,7 @@ if __name__ == '__main__':
 
 	# Save unlabeled samples to main data dict
 	this_sample_set_fname = 'unlabeled_samples_GRCh38_{}_per_side.json'.format(n_per_side)
-	samples_save_path = os.path.join('..', 'data', 'unlabeled_samples', 
+	samples_save_path = os.path.join('..', 'data', 'mecp2_binding', 
 										this_sample_set_fname)
 
 	with open(samples_save_path, 'w') as fp:
@@ -102,3 +104,5 @@ if __name__ == '__main__':
 	# Plot distribution of copy numbers
 	sns.ecdfplot(str_regions.num_copies)
 	plt.show()
+
+	ecdf = ECDF(str_regions.num_copies)

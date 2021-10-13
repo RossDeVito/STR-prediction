@@ -1,11 +1,15 @@
 # Project specific
 data/human-references/*
 !data/human-references/README.md 
-data/unlabeled_samples/*.json
-!data/unlabeled_samples/README.md 
+data/mecp2_binding/*.json
+!data/mecp2_binding/README.md 
 data/ChIP-seq/*
 !data/ChIP-seq/README.md 
 !data/ChIP-seq/*.bed
+
+data/mecp2_binding/samples/*
+
+prediction/mecp2_logs/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
