@@ -6,10 +6,13 @@ data/mecp2_binding/*.json
 data/ChIP-seq/*
 !data/ChIP-seq/README.md 
 !data/ChIP-seq/*.bed
+data/heterozygosity/*
+!data/heterozygosity/README.md 
 
 data/mecp2_binding/samples/*
 
 prediction/mecp2_logs/*
+prediction/heterozygosity_logs/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

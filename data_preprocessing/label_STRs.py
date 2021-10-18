@@ -61,7 +61,7 @@ if __name__ == '__main__':
 
 	print(bound_counts)
 
-	# Save unlabeled samples to main data dict
+	# Save labeled samples to main data dict
 	this_sample_set_fname = 'labeled_samples_GRCh38_500_per_side.json'
 	samples_save_path = os.path.join('..', 'data', 'mecp2_binding', 
 										this_sample_set_fname)

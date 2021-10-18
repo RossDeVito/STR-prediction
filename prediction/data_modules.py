@@ -64,7 +64,7 @@ class STRDataModule(pl.LightningDataModule):
 
 if __name__ == "__main__":
 	# Testing
-	data_dir = os.path.join('..', 'data', 'mecp2_binding', 'samples')
+	data_dir = os.path.join('..', 'data', 'heterozygosity', 'samples')
 	split_file = 'split_1.json'
 
 	STR_data = STRDataModule(data_dir, split_file, num_workers=2)

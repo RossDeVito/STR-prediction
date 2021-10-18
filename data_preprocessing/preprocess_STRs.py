@@ -86,9 +86,11 @@ if __name__ == '__main__':
 	max_STR_len = 100
 	output_seq_len = 1000
 
+	min_num_called = 100 # if None will skip, for het task
+
 	# Load labeled STRs to be preprocessed
-	samp_dir = os.path.join('..', 'data', 'mecp2_binding')
-	samp_fname = 'labeled_samples_GRCh38_500_per_side.json'
+	samp_dir = os.path.join('..', 'data', 'heterozygosity')
+	samp_fname = 'labeled_samples_het.json'
 	samp_path = os.path.join(samp_dir, samp_fname)
 
 	with open(samp_path) as fp:    
@@ -97,7 +99,7 @@ if __name__ == '__main__':
 	sample_data = []
 	labels = []
 
-	save_dir = os.path.join('..', 'data', 'mecp2_binding', 'samples')
+	save_dir = os.path.join('..', 'data', 'heterozygosity', 'samples')
 
 	# Filter samples by STR length, then create formatted output_seq_len samples
 	for _ in tqdm(range(len(samples))):
@@ -105,6 +107,12 @@ if __name__ == '__main__':
 
 		# filter out by STR length
 		if samp_dict['motif_len'] * samp_dict['num_copies'] > max_STR_len:
+			samp_dict = None
+			del samp_dict
+			continue
+
+		# filter out by min num called
+		if min_num_called is not None and samp_dict['num_called'] < min_num_called:
 			samp_dict = None
 			del samp_dict
 			continue
@@ -132,9 +140,9 @@ if __name__ == '__main__':
 
 	# Print stats
 	labels = np.array(labels)
-	print("Total samples:\t{}".format(len(labels)))
-	print("\t0:\t{}".format(((labels == 0).sum())))
-	print("\t1:\t{}".format(((labels == 1).sum())))
+	# print("Total samples:\t{}".format(len(labels)))
+	# print("\t0:\t{}".format(((labels == 0).sum())))
+	# print("\t1:\t{}".format(((labels == 1).sum())))
 
 	# Save JSON of preprocessed samples
 	this_sample_set_fname = 'sample_data.json'

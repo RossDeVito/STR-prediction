@@ -2,42 +2,58 @@ import os
 import json
 
 import pytorch_lightning as pl
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 from data_modules import STRDataModule
-from models import STRClassifier, basic_CNN
+from models import STRClassifier, STRRegressor, basic_CNN, ResNet
 
 
 if __name__ == '__main__':
+	torch.multiprocessing.set_sharing_strategy('file_system')
+	
 	# Load
-	data_dir = os.path.join('..', 'data', 'mecp2_binding', 'samples')
+	data_dir = os.path.join('..', 'data', 'heterozygosity', 'samples')
 	split_file = 'split_1.json'
 
-	task_log_dir = 'mecp2_logs'
+	task_log_dir = 'heterozygosity_logs'
+	model_log_dir = 'prelim1'
 
 	data = STRDataModule(
 		data_dir, 
 		split_file, 
-		batch_size=128,
+		batch_size=2,
 		num_workers=4
 	)
 
-	model = STRClassifier(basic_CNN(), pos_weight=.001)
+	model = STRRegressor(ResNet(), learning_rate=1e-3)
 
 	callbacks = [
 		# pl.callbacks.LearningRateMonitor('epoch'),
-		pl.callbacks.EarlyStopping('val_loss', verbose=True, patience=15),
+		pl.callbacks.EarlyStopping('val_loss', verbose=True, patience=1),
 		pl.callbacks.ModelCheckpoint(
 			monitor="val_loss",
-			filename='{epoch}-{val_loss:.6f}-{val_F1:.4f}'
+			filename='{epoch}-{val_loss:.6f}-{val_MeanSquaredError:.4f}'
+			# filename='{epoch}-{val_loss:.6f}-{val_F1:.4f}'
 		)
 	]
-	tb_logger = pl.loggers.TensorBoardLogger(os.getcwd(), task_log_dir)
+	tb_logger = pl.loggers.TensorBoardLogger(
+		os.path.join(os.getcwd(), task_log_dir), 
+		model_log_dir,
+		default_hp_metric=False
+	)
 	trainer = pl.Trainer(
 		callbacks=callbacks,
 		logger=tb_logger,
-		gpus=1, 
+		gpus=0, 
 		log_every_n_steps=1, 
-		auto_lr_find=True
+		max_epochs=1, 
+		limit_train_batches=20,
+		limit_val_batches=20,
+		limit_test_batches=20,
+		# auto_lr_find=True
 	)
 
 	trainer.tune(model, data)
@@ -53,3 +69,13 @@ if __name__ == '__main__':
 
 	with open(os.path.join(trainer.logger.log_dir, 'best_val.json'), 'w') as fp:
 		json.dump(best_val, fp)
+
+	val_preds = trainer.predict(
+		ckpt_path='best', 
+		dataloaders=data.val_dataloader()
+	)
+
+	y_hat = np.concatenate([r['y_hat'].cpu().numpy() for r in val_preds])
+	y_true = np.concatenate([r['y_true'].cpu().numpy() for r in val_preds])
+	sns.displot({'y_hat': y_hat, 'y_true': y_true})
+	plt.show()

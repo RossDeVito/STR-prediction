@@ -9,20 +9,20 @@ import numpy as np
 import pandas as pd
 
 
-def make_stratified_random_splits(df, train_ratio, test_ratio, rand_seed=None):
+def make_random_splits(df, sample_data, train_ratio, test_ratio, rand_seed=None):
 	train, val, test = np.split(
 		df.sample(frac=1, random_state=rand_seed),	# shuffle	
-    	[int(train_ratio*len(df)), int((1-test_ratio)*len(df))]
+		[int(train_ratio*len(df)), int((1-test_ratio)*len(df))]
 	)
 
 	# Make split json file
 	splits_data = {'train': [], 'val': [], 'test': []}
 
-	for i in train.idx.values:
+	for i in train.idx.values.astype(int):
 		splits_data['train'].append(sample_data[i])
-	for i in val.idx.values:
+	for i in val.idx.values.astype(int):
 		splits_data['val'].append(sample_data[i])
-	for i in test.idx.values:
+	for i in test.idx.values.astype(int):
 		splits_data['test'].append(sample_data[i])
 
 	return splits_data
@@ -32,7 +32,7 @@ if __name__ == '__main__':
 	train_ratio = .7
 	test_ratio = .15
 
-	sample_data_dir = os.path.join('..', 'data', 'mecp2_binding', 'samples')
+	sample_data_dir = os.path.join('..', 'data', 'heterozygosity', 'samples')
 	sample_data_path = os.path.join(sample_data_dir, 'sample_data.json')
 
 	# Load sample data
@@ -50,9 +50,9 @@ if __name__ == '__main__':
 	df = pd.DataFrame(np.vstack([idx, labels]).T, columns=['idx', 'label'])
 
 	# Generate splits
-	split_1 = make_stratified_random_splits(df, train_ratio, test_ratio, 147)
-	split_2 = make_stratified_random_splits(df, train_ratio, test_ratio, 36)
-	split_3 = make_stratified_random_splits(df, train_ratio, test_ratio, 23507)
+	split_1 = make_random_splits(df, sample_data, train_ratio, test_ratio, 147)
+	split_2 = make_random_splits(df, sample_data, train_ratio, test_ratio, 36)
+	split_3 = make_random_splits(df, sample_data, train_ratio, test_ratio, 23507)
 	
 	# Save splits as JSON
 	with open(os.path.join(sample_data_dir, 'split_1.json'), 'w') as fp:
