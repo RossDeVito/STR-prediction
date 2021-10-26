@@ -34,6 +34,25 @@ class STRDataset(Dataset):
 		}
 
 
+class STRDatasetNonzeroClass(STRDataset):
+	def __init__(self, data_dir, split_file, split_name):
+		super().__init__(data_dir, split_file, split_name)
+
+	def __getitem__(self, idx):
+		"""Return sequence in matrix form, sequence as string, chromosome
+		location, and label."""
+		item_data = self.split_data[idx]
+		feat_mat = np.load(os.path.join(self.data_dir, item_data['fname']))
+
+		return {
+			'feat_mat': torch.tensor(feat_mat).float(),
+			'seq_string': item_data['seq_string'],
+			'chr_loc': item_data['chr_loc'],
+			'label': torch.tensor(item_data['label'] > 0).float(),
+			'label_val': torch.tensor(item_data['label']).float()
+		}
+
+
 class STRDataModule(pl.LightningDataModule):
 	def __init__(self, data_dir, split_file, batch_size = 32, num_workers = 1,
 					shuffle = True):
@@ -62,12 +81,29 @@ class STRDataModule(pl.LightningDataModule):
 			num_workers=self.num_workers)
 
 
+class STRDataModuleZonzeroClass(STRDataModule):
+	"""Takes labels from regression and makes into >0 classification problem."""
+	def __init__(self, data_dir, split_file, batch_size = 32, num_workers = 1,
+					shuffle = True):
+		super().__init__(data_dir, split_file, batch_size, num_workers, shuffle)
+
+	def setup(self, stage=None):
+		self.train_data = STRDatasetNonzeroClass(self.data_dir, self.split_file, 'train')
+		self.val_data = STRDatasetNonzeroClass(self.data_dir, self.split_file, 'val')
+		self.test_data = STRDatasetNonzeroClass(self.data_dir, self.split_file, 'test')
+
+
 if __name__ == "__main__":
 	# Testing
-	data_dir = os.path.join('..', 'data', 'heterozygosity', 'samples')
+	data_dir = os.path.join('..', 'data', 'heterozygosity', 'samples2')
 	split_file = 'split_1.json'
 
 	STR_data = STRDataModule(data_dir, split_file, num_workers=2)
 	STR_data.setup()
 
 	print(next(iter(STR_data.val_dataloader()))['feat_mat'].shape)
+
+	STR_data_nz = STRDataModuleZonzeroClass(data_dir, split_file, num_workers=2)
+	STR_data_nz.setup()
+
+	print(next(iter(STR_data_nz.val_dataloader()))['feat_mat'].shape)

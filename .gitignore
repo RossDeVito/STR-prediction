@@ -8,6 +8,8 @@ data/ChIP-seq/*
 !data/ChIP-seq/*.bed
 data/heterozygosity/*
 !data/heterozygosity/README.md 
+data/HipSTR-references/*.json
+
 
 data/mecp2_binding/samples/*
 

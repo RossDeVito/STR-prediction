@@ -4,14 +4,14 @@ import os
 import numpy as np
 import pandas as pd
 import scipy.stats as stats
-import matplotlib.pyplot as plt
-import seaborn as sns
+# import matplotlib.pyplot as plt
+# import seaborn as sns
 from tqdm import tqdm
 
 
 if __name__ == '__main__':
 	# Load target STRs to be labeled
-	unlabeled_samp_dir = os.path.join('..', 'data', 'mecp2_binding')
+	unlabeled_samp_dir = os.path.join('..', 'data', 'HipSTR-references')
 	unlabeled_samp_fname = 'unlabeled_samples_GRCh38_500_per_side.json'
 	unlabeled_samp_path = os.path.join(unlabeled_samp_dir, unlabeled_samp_fname)
 
@@ -30,12 +30,12 @@ if __name__ == '__main__':
 	data_df = data_df.dropna()
 	print("total labeled data points:\t{}".format(len(data_df)))
 
-	# Plot distributions
-	sns.displot(data_df.het, kde=True)
-	hets = data_df.het.values
-	hets[hets == 0.0] = .001
-	sns.displot(np.log(hets), kde=True)
-	plt.show()
+	# # Plot distributions
+	# sns.displot(data_df.het, kde=True)
+	# hets = data_df.het.values.copy()
+	# hets[hets == 0.0] = .001
+	# sns.displot(np.log(hets), kde=True)
+	# plt.show()
 
 	# Get peak start and end locs by chromosome. Will be used to find 
 	# overlap with STR regions.
@@ -79,5 +79,5 @@ if __name__ == '__main__':
 	with open(samples_save_path, 'w') as fp:
 		json.dump(new_samples, fp, indent=4)
 
-	sns.displot(np.array(n_called))
-	plt.show()
+	# sns.displot(np.array(n_called))
+	# plt.show()

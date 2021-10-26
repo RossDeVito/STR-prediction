@@ -7,7 +7,7 @@ import json
 
 import numpy as np
 import pandas as pd
-from statsmodels.distributions.empirical_distribution import ECDF
+# from statsmodels.distributions.empirical_distribution import ECDF
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -20,6 +20,8 @@ if __name__ == '__main__':
 	str_region_bed_fname = 'GRCh38.hipstr_reference.bed.gz'
 	str_region_bed_path = os.path.join('..', 'data', 'HipSTR-references', 
 										str_region_bed_fname)
+
+	print("Loading bed data...")
 	str_regions = pd.read_csv(
 		str_region_bed_path, 
 		sep='\t', 
@@ -95,14 +97,14 @@ if __name__ == '__main__':
 
 	# Save unlabeled samples to main data dict
 	this_sample_set_fname = 'unlabeled_samples_GRCh38_{}_per_side.json'.format(n_per_side)
-	samples_save_path = os.path.join('..', 'data', 'mecp2_binding', 
+	samples_save_path = os.path.join('..', 'data', 'HipSTR-references', 
 										this_sample_set_fname)
 
 	with open(samples_save_path, 'w') as fp:
 		json.dump(samples, fp, indent=4)
 
-	# Plot distribution of copy numbers
-	sns.ecdfplot(str_regions.num_copies)
-	plt.show()
+	# # Plot distribution of copy numbers
+	# sns.ecdfplot(str_regions.num_copies)
+	# plt.show()
 
-	ecdf = ECDF(str_regions.num_copies)
+	# ecdf = ECDF(str_regions.num_copies)

@@ -7,7 +7,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-from data_modules import STRDataModule
+from data_modules import STRDataModule, STRDataModuleZonzeroClass
 from models import STRClassifier, STRRegressor, basic_CNN, ResNet
 
 
@@ -15,24 +15,24 @@ if __name__ == '__main__':
 	# torch.multiprocessing.set_sharing_strategy('file_system')
 
 	# options
-	from_checkpoint = True
+	from_checkpoint = False
 	checkpoint_path = 'heterozygosity_logs/resnet_1/version_4/checkpoints/epoch=27-last.ckpt'
 
 	# Load
-	data_dir = os.path.join('..', 'data', 'heterozygosity', 'samples')
+	data_dir = os.path.join('..', 'data', 'heterozygosity', 'samples2')
 	split_file = 'split_1.json'
 
 	task_log_dir = 'heterozygosity_logs'
 	model_log_dir = 'resnet_1'
 
-	data = STRDataModule(
+	data = STRDataModuleZonzeroClass(
 		data_dir, 
 		split_file, 
 		batch_size=256,
 		num_workers=3
 	)
 
-	model = STRRegressor(ResNet(), learning_rate=1e-3)
+	model = STRClassifier(ResNet(), learning_rate=1e-3)
 
 	callbacks = [
 		# pl.callbacks.LearningRateMonitor('epoch'),
@@ -69,7 +69,7 @@ if __name__ == '__main__':
 			# limit_train_batches=20,
 			# limit_val_batches=20,
 			# limit_test_batches=20,
-			# auto_lr_find=True
+			auto_lr_find=True
 		)
 
 	trainer.tune(model, data)

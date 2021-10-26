@@ -64,6 +64,12 @@ class STRClassifier(pl.LightningModule):
 		self.log_dict(metrics_dict, prog_bar=True)
 		self.log("test_loss", loss, prog_bar=True)
 
+	def predict_step(self, batch, batch_idx: int, dataloader_idx: int = None):
+		return {
+			'y_hat': self(batch['feat_mat']).flatten(), 
+			'y_true': batch['label']
+		}
+
 	def configure_optimizers(self):
 		return torch.optim.Adam(self.parameters(), lr=self.learning_rate)
 
