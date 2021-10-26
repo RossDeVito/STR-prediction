@@ -19,7 +19,7 @@ if __name__ == '__main__':
 	checkpoint_path = 'heterozygosity_logs/resnet_1/version_4/checkpoints/epoch=27-last.ckpt'
 
 	# Load
-	data_dir = os.path.join('..', 'data', 'heterozygosity', 'samples2')
+	data_dir = os.path.join('..', 'data', 'heterozygosity', 'samples3l')
 	split_file = 'split_1.json'
 
 	task_log_dir = 'heterozygosity_logs'
@@ -28,7 +28,7 @@ if __name__ == '__main__':
 	data = STRDataModuleZonzeroClass(
 		data_dir, 
 		split_file, 
-		batch_size=256,
+		batch_size=128,
 		num_workers=3
 	)
 

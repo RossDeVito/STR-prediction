@@ -99,7 +99,7 @@ if __name__ == '__main__':
 	sample_data = []
 	labels = []
 
-	save_dir = os.path.join('..', 'data', 'heterozygosity', 'samples2')
+	save_dir = os.path.join('..', 'data', 'heterozygosity', 'samples3')
 
 	# Filter samples by STR length, then create formatted output_seq_len samples
 	for _ in tqdm(range(len(samples))):
@@ -135,15 +135,15 @@ if __name__ == '__main__':
 		samp_dict = None
 		del samp_dict
 
-		# for dev
-		if len(labels) > 10000:
-			break
+		# # for dev
+		# if len(labels) > 10000:
+		# 	break
 
 	# Print stats
 	labels = np.array(labels)
 	print("Total samples:\t{}".format(len(labels)))
 	print("\t0:\t{}".format(((labels == 0).sum())))
-	print("\t1:\t{}".format(((labels == 1).sum())))
+	print("\t1:\t{}".format(((labels > 0).sum())))
 
 	# Save JSON of preprocessed samples
 	this_sample_set_fname = 'sample_data.json'
