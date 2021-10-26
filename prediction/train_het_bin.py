@@ -8,7 +8,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 from data_modules import STRDataModule, STRDataModuleZonzeroClass
-from models import STRClassifier, STRRegressor, basic_CNN, ResNet
+from models import STRClassifier, ResNet, InceptionTime
 
 
 if __name__ == '__main__':
@@ -23,7 +23,7 @@ if __name__ == '__main__':
 	split_file = 'split_1.json'
 
 	task_log_dir = 'heterozygosity_logs'
-	model_log_dir = 'resnet_1'
+	model_log_dir = 'incep_1'
 
 	data = STRDataModuleZonzeroClass(
 		data_dir, 
@@ -32,7 +32,7 @@ if __name__ == '__main__':
 		num_workers=3
 	)
 
-	model = STRClassifier(ResNet(), learning_rate=1e-3)
+	model = STRClassifier(InceptionTime(), learning_rate=1e-3)
 
 	callbacks = [
 		# pl.callbacks.LearningRateMonitor('epoch'),

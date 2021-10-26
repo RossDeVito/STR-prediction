@@ -127,22 +127,23 @@ if __name__ == '__main__':
 			'fname': fm_fname,
 			'seq_string': seq_string,
 			'chr_loc': chr_loc,
-			'label': samp_dict['label']
+			'label': samp_dict['label'],
+			'HipSTR_name': samp_dict['HipSTR_name']
 		})
 
 		labels.append(samp_dict['label'])
 		samp_dict = None
 		del samp_dict
 
-		# # for dev
-		# if len(labels) > 10000:
-		# 	break
+		# for dev
+		if len(labels) > 10000:
+			break
 
 	# Print stats
 	labels = np.array(labels)
-	# print("Total samples:\t{}".format(len(labels)))
-	# print("\t0:\t{}".format(((labels == 0).sum())))
-	# print("\t1:\t{}".format(((labels == 1).sum())))
+	print("Total samples:\t{}".format(len(labels)))
+	print("\t0:\t{}".format(((labels == 0).sum())))
+	print("\t1:\t{}".format(((labels == 1).sum())))
 
 	# Save JSON of preprocessed samples
 	this_sample_set_fname = 'sample_data.json'
