@@ -12,7 +12,7 @@ import pandas as pd
 from tqdm import tqdm
 
 
-def make_feat_mat(seq_string, is_STR, STR_dist, distance):
+def make_feat_mat(seq_string, distance):
 	bases = np.array(list(seq_string))
 	unk = (bases == 'N').astype(int) / 4
 
@@ -21,50 +21,38 @@ def make_feat_mat(seq_string, is_STR, STR_dist, distance):
 	G = unk + (bases == 'G')
 	T = unk + (bases == 'T')
 
-	return np.vstack((A, C, G, T, is_STR, STR_dist, distance))
+	return np.vstack((A, C, G, T, distance))
 
 
-def make_features(samp_dict, output_seq_len, bp_dist_base=1000.0):
+def make_pre_post_features(samp_dict, n_per_side=500, bp_dist_base=1000.0):
 	"""Given a dictionary representing a STR sample (like those generated
-	by find_target_STRs.py or label_STRs.py), finds the input_seq_len
-	sequence centered at the STR. For this centered sequence, genereates a
-	feature matrix (which will be input for models), sequence string,
-	and chromosome location.
-	"""
-	str_seq = samp_dict['str_seq']
-	str_seq_len = len(str_seq)
-	
-	n_surrounding = output_seq_len - str_seq_len
-	n_before = math.ceil(n_surrounding / 2.0)
-	n_after = math.floor(n_surrounding / 2.0)
+	by find_target_STRs.py or label_STRs.py), creates feature matrix
+	where first n_per_side indices are for pre-str sequence and the 
+	remaining n_per_side the post-str seqence.
 
+	Returns: Matrix with features A, C, G, T, distance_from_str
+		A, C, G, T: one-hot encoding of sequence (or all .25 if unknown "N")
+		distance_from_str: distance from STR in kBp
+	"""
 	pre_seq = samp_dict['pre_seq']
 	post_seq = samp_dict['post_seq']
 
 	# If sample from complement strand, reverse seqence direction
 	if samp_dict['complement'] == True:
-		str_seq = str_seq[::-1]
 		new_pre_seq = post_seq[::-1]
 		post_seq = pre_seq[::-1]
 		pre_seq = new_pre_seq
 
-	pre_seq = pre_seq[-n_before:]
-	post_seq = post_seq[:n_after]
+	pre_seq = pre_seq[-n_per_side:]
+	post_seq = post_seq[:n_per_side]
+	assert len(pre_seq) == len(post_seq) == n_per_side
 
-	seq_string = pre_seq + str_seq + post_seq
-	is_STR = np.hstack(
-		(np.zeros(n_before), np.ones(str_seq_len), np.zeros(n_after))
-	)
-	STR_dist = np.hstack((
-		-np.linspace(n_before, 1, n_before) / 1000, # units of kBp
-		np.zeros(str_seq_len),
-		np.linspace(1, n_after, n_after) / 1000
+	seq_string = pre_seq + post_seq
+	
+	dists = np.hstack((
+		np.array(list(range(n_per_side, 0, -1))) * -1 / bp_dist_base,
+		np.array(list(range(1,n_per_side+1, 1))) / bp_dist_base
 	))
-	distance = np.linspace(0, output_seq_len/1000.0, output_seq_len, 
-							endpoint=False)
-	distance = distance - distance.mean()
-
-	assert len(seq_string) == output_seq_len
 
 	# Create string describing new seqence's location
 	str_seq_name = samp_dict['str_seq_name']
@@ -72,19 +60,19 @@ def make_features(samp_dict, output_seq_len, bp_dist_base=1000.0):
 	start, end = (int(v) for v in loc_range.split('-'))
 	
 	if samp_dict['complement'] == True:
-		new_name = '{}:{}-{} (complement)'.format(chr_name, start-n_after, end+n_before)
+		new_name = '{}:{}-{} (complement)'.format(chr_name, start-n_per_side, end+n_per_side)
 	else:
-		new_name = '{}:{}-{}'.format(chr_name, start-n_before, end+n_after)
+		new_name = '{}:{}-{}'.format(chr_name, start-n_per_side, end+n_per_side)
 
 	# Create feature matrix
-	seq_feat_mat = make_feat_mat(seq_string, is_STR, STR_dist, distance)
+	seq_feat_mat = make_feat_mat(seq_string, dists)
 
 	return seq_feat_mat, seq_string, new_name
 
 
 if __name__ == '__main__':
 	max_STR_len = 100
-	output_seq_len = 1000
+	n_per_side = 500
 
 	min_num_called = 100 # if None will skip, for het task
 
@@ -99,28 +87,24 @@ if __name__ == '__main__':
 	sample_data = []
 	labels = []
 
-	save_dir = os.path.join('..', 'data', 'heterozygosity', 'samples_prepost_2')
+	save_dir = os.path.join('..', 'data', 'heterozygosity', 'samples_prepost_1')
 
 	# Filter samples by STR length, then create formatted output_seq_len samples
-	for _ in tqdm(range(len(samples))):
+	for i in tqdm(range(len(samples))):
 		samp_dict = samples.pop(0)
 
 		# filter out by STR length
 		if samp_dict['motif_len'] * samp_dict['num_copies'] > max_STR_len:
-			samp_dict = None
-			del samp_dict
 			continue
 
 		# filter out by min num called
 		if min_num_called is not None and samp_dict['num_called'] < min_num_called:
-			samp_dict = None
-			del samp_dict
 			continue
 
-		seq_mat, seq_string, chr_loc = make_features(samp_dict, output_seq_len)
-		
+		seq_mat, seq_string, chr_loc = make_pre_post_features(samp_dict, n_per_side)
+			
 		# Save feature matrix to disk
-		fm_fname = "{}.npy".format(len(sample_data))
+		fm_fname = "{}.npy".format(i)
 		np.save(os.path.join(save_dir, fm_fname), seq_mat)
 
 		sample_data.append({
@@ -131,19 +115,15 @@ if __name__ == '__main__':
 			'HipSTR_name': samp_dict['HipSTR_name']
 		})
 
-		labels.append(samp_dict['label'])
-		samp_dict = None
-		del samp_dict
-
 		# # for dev
-		# if len(labels) > 10000:
+		# if i > 10000:
 		# 	break
 
 	# Print stats
-	labels = np.array(labels)
-	print("Total samples:\t{}".format(len(labels)))
-	print("\t0:\t{}".format(((labels == 0).sum())))
-	print("\t1:\t{}".format(((labels > 0).sum())))
+	# labels = np.array(labels)
+	# print("Total samples:\t{}".format(len(labels)))
+	# print("\t0:\t{}".format(((labels == 0).sum())))
+	# print("\t1:\t{}".format(((labels > 0).sum())))
 
 	# Save JSON of preprocessed samples
 	this_sample_set_fname = 'sample_data.json'
