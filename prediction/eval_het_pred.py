@@ -3,6 +3,7 @@
 import os
 
 import numpy as np
+import pandas as pd
 import torch
 import pytorch_lightning as pl
 from torchmetrics import MetricCollection
@@ -12,7 +13,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 from data_modules import STRDataModuleZonzeroClass
-from models import STRClassifier, ResNet
+from models import STRClassifier, ResNet, InceptionTime
 
 
 if __name__ == '__main__':
@@ -20,12 +21,32 @@ if __name__ == '__main__':
 		{
 			'name': 'ResNet 1, lr=.001',
 			'model': ResNet(),
-			'load_path': '../trained_models/heterozygosity_bin/resnet_1_lr001/checkpoints/epoch=8-best_val_loss.ckpt'
+			'load_path': '../trained_models/heterozygosity_bin/resnet_1_lr001/checkpoints/epoch=10-best_val_loss.ckpt'
 		},
 		{   'name': 'ResNet 1, lr=.00025',
 			'model': ResNet(),
 			'load_path': '../trained_models/heterozygosity_bin/resnet_1_lr00025/checkpoints/epoch=8-best_val_loss.ckpt'
 		},
+		{   'name': 'Inception 1, lr=auto, bs128',
+			'model': InceptionTime(),
+			'load_path': '../trained_models/heterozygosity_bin/incep_1_alr/checkpoints/epoch=19-best_val_loss.ckpt'
+		},
+		{   'name': 'Inception 1, lr=auto, bs256',
+			'model': InceptionTime(),
+			'load_path': '../trained_models/heterozygosity_bin/incep_1_alr_bs256/checkpoints/epoch=36-best_val_loss.ckpt'
+		},
+		# {   'name': 'Inception 2, lr=.03, bs128',
+		# 	'model': InceptionTime(
+		# 		in_channels=7, output_dim=1, kernel_sizes=[7, 19, 25, 39], 
+		# 		n_filters=50, depth=9),
+		# 	'load_path': '../trained_models/heterozygosity_bin/incep_2_lr03/checkpoints/epoch=18-best_val_loss.ckpt'
+		# },
+		# {   'name': 'Inception 2, lr=.001, bs128',
+		# 	'model': InceptionTime(
+		# 		in_channels=7, output_dim=1, kernel_sizes=[7, 19, 25, 39], 
+		# 		n_filters=50, depth=9),
+		# 	'load_path': '../trained_models/heterozygosity_bin/incep_2_lr001/checkpoints/epoch=10-best_val_loss.ckpt'
+		# },
 	]
 
 	# Load data splits
@@ -58,7 +79,7 @@ if __name__ == '__main__':
 			m['load_path'],
 			model=m['model']
 		)
-		trainer = pl.Trainer(weights_summary=None, gpus=1)
+		trainer = pl.Trainer(gpus=1)
 
 		preds = trainer.predict(
 			model=model, 
@@ -87,30 +108,38 @@ if __name__ == '__main__':
 		results.append(res_dict)
 
 	# plot ROC and PR curves
-	lw = 1
+	lw = 2
 
 	fig, (ax_roc, ax_pr) = plt.subplots(1, 2, sharex=True, sharey=True, 
-										subplot_kw=dict(box_aspect=1))
+										subplot_kw=dict(box_aspect=1),
+										figsize=(12, 6))
+	ax_roc.plot([0, 1], [0, 1], color="black", lw=lw, linestyle=":")
 
 	for res in results:
-		ax_roc.plot(res['ROC_fpr'], res['ROC_tpr'], label=res['name'], lw=lw)
-		ax_pr.plot(res['PR_recall'], res['PR_prec'], label=res['name'], lw=lw)
+		ax_roc.plot(res['ROC_fpr'], res['ROC_tpr'], label=res['name'], lw=lw,
+					linestyle='--')
+		ax_pr.plot(res['PR_recall'], res['PR_prec'], label=res['name'], lw=lw,
+					linestyle='--')
 
 	fig.suptitle("Binary Heterozygosity Prediction")
 	ax_roc.set_title("ROC")
 	ax_roc.set_xlabel("False Positive Rate")
 	ax_roc.set_ylabel("True Positive Rate")
-	ax_roc.legend()
+	ax_roc.legend(loc='lower right')
 	ax_pr.set_title("PR Curve")
 	ax_pr.set_xlabel("Recall")
 	ax_pr.set_ylabel("Precision")
-	ax_pr.legend()
+	ax_pr.legend(loc='lower left')
+	fig.tight_layout()
 
-	fig.savefig('../trained_models/heterozygosity_bin/roc_pr.png')
+	fig.savefig('../trained_models/heterozygosity_bin/roc_pr.png',
+				bbox_inches='tight')
 	plt.close(fig)
 
 	# plot confusion matrices
-	fig, axs = plt.subplots(ncols=len(results), subplot_kw=dict(box_aspect=1))
+	unit_len = 3
+	fig, axs = plt.subplots(ncols=len(results), subplot_kw=dict(box_aspect=1),
+				figsize=(len(results)*unit_len, unit_len))
 
 	for i, res in enumerate(results):
 		axs[i].set_title(res['name'])
@@ -124,6 +153,22 @@ if __name__ == '__main__':
 
 	axs[0].set_ylabel("True")
 	axs[0].set_xlabel("Pred")
-	fig.tight_layout()
-	fig.savefig('../trained_models/heterozygosity_bin/CMs.png')
+	# fig.tight_layout()
+	fig.savefig('../trained_models/heterozygosity_bin/CMs.png',
+				bbox_inches='tight')
 	plt.close(fig)
+
+	# Make table
+	df = pd.DataFrame(results)
+
+	table = df[['name', 'macro_F1', 'ROC_auc', 'class_precision', 'class_recall']]
+	table['macro_F1'] = [s.item() for s in table.macro_F1]
+	# table['ROC_auc'] = [s.item() for s in table.ROC_auc]
+	table['class_precision_0'] = [s[0].item() for s in table.class_precision]
+	table['class_precision_1'] = [s[1].item() for s in table.class_precision]
+	table['class_recall_0'] = [s[0].item() for s in table.class_recall]
+	table['class_recall_1'] = [s[1].item() for s in table.class_recall]
+	table = table.drop(columns=['class_precision', 'class_recall'])
+	table.to_csv('../trained_models/heterozygosity_bin/table.csv')
+
+	print(table)

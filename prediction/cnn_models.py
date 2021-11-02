@@ -340,6 +340,7 @@ class InceptionBlock(nn.Module):
 		self.inception = nn.ModuleList()
 		self.shortcuts = nn.ModuleList()
 		self.activations = nn.ModuleList()
+		self.dropouts = nn.ModuleList()
 
 		for d in range(depth):
 			# Add inception module
@@ -347,14 +348,18 @@ class InceptionBlock(nn.Module):
 				self.inception.append(InceptionModule(
 					in_channels=self.in_channels, 
 					n_filters=self.n_filters,
+					kernel_sizes=self.kernel_sizes,
 					use_bottleneck=False,
+					activation=self.activation_type,
 					**kwargs
 				))
 			else:
 				self.inception.append(InceptionModule(
 					in_channels=(len(self.kernel_sizes)+1)*self.n_filters,
 					n_filters=self.n_filters,
+					kernel_sizes=self.kernel_sizes,
 					use_bottleneck=self.use_bottleneck,
+					activation=self.activation_type,
 					**kwargs
 				))
 			
@@ -381,6 +386,9 @@ class InceptionBlock(nn.Module):
 					get_activation_fn(self.activation_type)
 				)
 
+			# Add dropout
+			self.dropouts.append(nn.Dropout(p=self.dropout_p))
+
 	def forward(self, x):
 		res = x
 		for d in range(self.depth):
@@ -389,6 +397,7 @@ class InceptionBlock(nn.Module):
 				x = x + self.shortcuts[d//3](res)
 				x = self.activations[d//3](x)
 				res = x
+			x = self.dropouts[d](x)
 		return x
 
 
@@ -438,3 +447,5 @@ if __name__ == '__main__':
 
 	model = InceptionTime(in_channels=7, output_dim=1, kernel_sizes=[7, 19, 39])
 	r = model(x)
+
+	m2 = InceptionTime(in_channels=7, output_dim=1, kernel_sizes=[7, 19, 39, 51], n_filters=32)

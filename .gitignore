@@ -9,12 +9,15 @@ data/ChIP-seq/*
 data/heterozygosity/*
 !data/heterozygosity/README.md 
 data/HipSTR-references/*.json
+trained_models/*
 
 
 data/mecp2_binding/samples/*
 
 prediction/mecp2_logs/*
 prediction/heterozygosity_logs/*
+prediction/lightning_logs/*
+prediction/lr_find_temp_model.ckpt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
