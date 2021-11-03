@@ -10,6 +10,7 @@ from torchmetrics import ConfusionMatrix, Precision, Recall, F1
 from torchmetrics import MeanSquaredError, R2Score
 
 from cnn_models import *
+from prepost_models import *
 
 
 class STRClassifier(pl.LightningModule):
@@ -36,6 +37,71 @@ class STRClassifier(pl.LightningModule):
 		x = batch['feat_mat']
 		y = batch['label']
 		logits = self.model(x)
+
+		if self.pos_weight is not None:
+			weight = torch.tensor([self.pos_weight], device=self.device)
+		else:
+			weight = self.pos_weight
+
+		loss = F.binary_cross_entropy_with_logits(logits, y.unsqueeze(1).float(),
+													weight=weight)
+		return loss, logits, y
+
+	def training_step(self, batch, batch_idx):
+		loss, logits, y = self.shared_step(batch)
+		metrics_dict = self.train_metrics(F.sigmoid(logits), y.long())
+		self.log_dict(metrics_dict, on_epoch=True)
+		self.log("train_loss", loss, on_step=True, on_epoch=True,
+					prog_bar=True)
+		return loss
+
+	def validation_step(self, batch, batch_idx):
+		loss, logits, y = self.shared_step(batch)
+		metrics_dict = self.val_metrics(F.sigmoid(logits), y.long())
+		self.log_dict(metrics_dict, prog_bar=True)
+		self.log("val_loss", loss, prog_bar=True)
+
+	def test_step(self, batch, batch_idx):
+		loss, logits, y = self.shared_step(batch)
+		metrics_dict = self.test_metrics(F.sigmoid(logits), y.long())
+		self.log_dict(metrics_dict, prog_bar=True)
+		self.log("test_loss", loss, prog_bar=True)
+
+	def predict_step(self, batch, batch_idx: int, dataloader_idx: int = None):
+		return {
+			'y_hat': self(batch['feat_mat']).flatten(), 
+			'y_true': batch['label']
+		}
+
+	def configure_optimizers(self):
+		return torch.optim.Adam(self.parameters(), lr=self.learning_rate)
+
+
+class STRPrePostClassifier(pl.LightningModule):
+	def __init__(self, model, pos_weight=None, learning_rate=1e-3):
+		super().__init__()
+		self.model = model
+		self.pos_weight = pos_weight
+		self.learning_rate = learning_rate
+
+		# Metrics
+		metrics = MetricCollection([
+			Precision(num_classes=2, average='macro', multiclass=True),
+			Recall(num_classes=2, average='macro', multiclass=True),
+			F1(num_classes=2, average='macro', multiclass=True),
+		])
+		self.train_metrics = metrics.clone(prefix='train_')
+		self.val_metrics = metrics.clone(prefix='val_')
+		self.test_metrics = metrics.clone(prefix='test_')
+
+	def forward(self, x_pre, x_post):
+		return F.sigmoid(self.model(x_pre, x_post))
+
+	def shared_step(self, batch):
+		x_pre = batch['pre_feat_mat']
+		x_post = batch['post_feat_mat']
+		y = batch['label']
+		logits = self.model(x_pre, x_post)
 
 		if self.pos_weight is not None:
 			weight = torch.tensor([self.pos_weight], device=self.device)
