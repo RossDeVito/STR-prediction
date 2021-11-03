@@ -325,7 +325,7 @@ class InceptionBlock(nn.Module):
 	def __init__(self, in_channels, depth=6, n_filters=32, 
 					kernel_sizes=[9, 19, 39], use_residual=True, 
 					activation='relu', use_bottleneck=True, 
-					dropout=.3, **kwargs):
+					dropout=.3, bottleneck_first=False, **kwargs):
 		super().__init__()
 		self.in_channels = in_channels
 		self.depth = depth
@@ -335,6 +335,7 @@ class InceptionBlock(nn.Module):
 		self.activation_type = activation
 		self.use_bottleneck = use_bottleneck
 		self.dropout_p = dropout
+		self.bottleneck_first = bottleneck_first
 
 		# Create components
 		self.inception = nn.ModuleList()
@@ -344,7 +345,7 @@ class InceptionBlock(nn.Module):
 
 		for d in range(depth):
 			# Add inception module
-			if d == 0:
+			if d == 0 and not self.bottleneck_first:
 				self.inception.append(InceptionModule(
 					in_channels=self.in_channels, 
 					n_filters=self.n_filters,
