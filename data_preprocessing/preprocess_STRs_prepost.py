@@ -87,7 +87,7 @@ if __name__ == '__main__':
 	sample_data = []
 	labels = []
 
-	save_dir = os.path.join('..', 'data', 'heterozygosity', 'samples_prepost_1')
+	save_dir = os.path.join('..', 'data', 'heterozygosity', 'samples_prepost_2')
 
 	# Filter samples by STR length, then create formatted output_seq_len samples
 	for i in tqdm(range(len(samples))):
