@@ -19,15 +19,15 @@ if __name__ == '__main__':
 
 	# Load
 	data_dir = os.path.join('..', 'data', 'heterozygosity', 'samples_prepost_2')
-	split_file = 'split_1.json'
+	split_file = 'split_1_nc6.json'
 
 	task_log_dir = 'heterozygosity_logs'
-	model_log_dir = 'incep_4_2_pp'
+	model_log_dir = 'incep_4_2_pp_nc6'
 
 	data = STRHetPrePostDataModule(
 		data_dir, 
 		split_file, 
-		batch_size=8,
+		batch_size=64,
 		num_workers=3
 	)
 
@@ -65,10 +65,10 @@ if __name__ == '__main__':
 			logger=tb_logger,
 			gpus=1, 
 			log_every_n_steps=1, 
-			max_epochs=3, 
-			limit_train_batches=20,
-			limit_val_batches=20,
-			limit_test_batches=20,
+			# max_epochs=3, 
+			# limit_train_batches=20,
+			# limit_val_batches=20,
+			# limit_test_batches=20,
 			# auto_lr_find=True
 		)
 
