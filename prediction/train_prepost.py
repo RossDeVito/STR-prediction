@@ -33,7 +33,12 @@ if __name__ == '__main__':
 
 	# incep_2
 	net = InceptionPrePostModel()
-	model = STRPrePostClassifier(net, learning_rate=1e-3)
+	model = STRPrePostClassifier(
+		net, 
+		learning_rate=1e-3, 
+		reduce_lr_on_plateau=True,
+		patience=10
+	)
 
 	callbacks = [
 		pl.callbacks.EarlyStopping('val_loss', verbose=True, patience=25),

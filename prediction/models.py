@@ -20,6 +20,8 @@ class STRClassifier(pl.LightningModule):
 		self.pos_weight = pos_weight
 		self.learning_rate = learning_rate
 
+		self.save_hyperparameters('learning_rate', 'pos_weight')
+
 		# Metrics
 		metrics = MetricCollection([
 			Precision(num_classes=2, average='macro', multiclass=True),
@@ -78,11 +80,18 @@ class STRClassifier(pl.LightningModule):
 
 
 class STRPrePostClassifier(pl.LightningModule):
-	def __init__(self, model, pos_weight=None, learning_rate=1e-3):
+	def __init__(self, model, pos_weight=None, learning_rate=1e-3,
+			reduce_lr_on_plateau=False, reduce_lr_factor=0.1, patience=10):
 		super().__init__()
 		self.model = model
 		self.pos_weight = pos_weight
 		self.learning_rate = learning_rate
+		self.reduce_lr_on_plateau = reduce_lr_on_plateau
+		self.reduce_lr_factor = reduce_lr_factor
+		self.patience = patience
+
+		self.save_hyperparameters('learning_rate', 'pos_weight', 
+			'reduce_lr_on_plateau', 'reduce_lr_factor', 'patience')
 
 		# Metrics
 		metrics = MetricCollection([
@@ -139,7 +148,23 @@ class STRPrePostClassifier(pl.LightningModule):
 		}
 
 	def configure_optimizers(self):
-		return torch.optim.Adam(self.parameters(), lr=self.learning_rate)
+		if self.reduce_lr_on_plateau:
+			optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
+			scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+				optimizer, 
+				factor=self.reduce_lr_factor, 
+				patience=self.patience,
+				verbose=True
+			)
+			return {
+				'optimizer': optimizer,
+				'lr_scheduler': {
+					'scheduler': scheduler,
+					'monitor': 'val_loss',
+				}
+			}
+		else:
+			return torch.optim.Adam(self.parameters(), lr=self.learning_rate)
 
 
 class STRRegressor(pl.LightningModule):
@@ -147,6 +172,8 @@ class STRRegressor(pl.LightningModule):
 		super().__init__()
 		self.model = model
 		self.learning_rate = learning_rate
+
+		self.save_hyperparameters('learning_rate', 'pos_weight')
 
 		# Metrics
 		metrics = MetricCollection({
