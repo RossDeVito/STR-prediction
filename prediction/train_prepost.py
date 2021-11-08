@@ -27,7 +27,7 @@ if __name__ == '__main__':
 	data = STRHetPrePostDataModule(
 		data_dir, 
 		split_file, 
-		batch_size=8,
+		batch_size=256,
 		num_workers=3
 	)
 
@@ -65,10 +65,10 @@ if __name__ == '__main__':
 			logger=tb_logger,
 			gpus=1, 
 			log_every_n_steps=1, 
-			max_epochs=3, 
-			limit_train_batches=20,
-			limit_val_batches=20,
-			limit_test_batches=20,
+			# max_epochs=3, 
+			# limit_train_batches=20,
+			# limit_val_batches=20,
+			# limit_test_batches=20,
 			# auto_lr_find=True
 		)
 
