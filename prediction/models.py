@@ -134,7 +134,7 @@ class STRPrePostClassifier(pl.LightningModule):
 
 	def predict_step(self, batch, batch_idx: int, dataloader_idx: int = None):
 		return {
-			'y_hat': self(batch['feat_mat']).flatten(), 
+			'y_hat': self(batch['pre_feat_mat'], batch['post_feat_mat']).flatten(), 
 			'y_true': batch['label']
 		}
 
