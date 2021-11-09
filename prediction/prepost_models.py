@@ -56,10 +56,7 @@ class ConcatPredictorBert(nn.Module):
         super(ConcatPredictorBert, self).__init__()
         self.predictor = nn.Sequential(
             nn.Dropout(0.25),
-            nn.Linear(1536, 100),
-            nn.GELU(),
-            nn.Dropout(0.25),
-            nn.Linear(100, 1),
+            nn.Linear(1536, 1),
         )
 
     def forward(self, pre_embed, post_embed):
