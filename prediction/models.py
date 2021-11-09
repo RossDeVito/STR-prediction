@@ -81,7 +81,12 @@ class STRClassifier(pl.LightningModule):
 
 class STRPrePostClassifier(pl.LightningModule):
 	def __init__(self, model, pos_weight=None, learning_rate=1e-3,
+<<<<<<< HEAD
 			reduce_lr_on_plateau=False, reduce_lr_factor=0.1, patience=10):
+=======
+			reduce_lr_on_plateau=False, reduce_lr_factor=0.1, patience=10,
+			bert=False, fe_learning_rate=1e-5):
+>>>>>>> 97643066ff3a4e6deb32774f40b99581470056b1
 		super().__init__()
 		self.model = model
 		self.pos_weight = pos_weight
@@ -89,6 +94,11 @@ class STRPrePostClassifier(pl.LightningModule):
 		self.reduce_lr_on_plateau = reduce_lr_on_plateau
 		self.reduce_lr_factor = reduce_lr_factor
 		self.patience = patience
+<<<<<<< HEAD
+=======
+		self.bert = bert
+		self.fe_learning_rate = fe_learning_rate
+>>>>>>> 97643066ff3a4e6deb32774f40b99581470056b1
 
 		self.save_hyperparameters('learning_rate', 'pos_weight', 
 			'reduce_lr_on_plateau', 'reduce_lr_factor', 'patience')
@@ -107,8 +117,20 @@ class STRPrePostClassifier(pl.LightningModule):
 		return F.sigmoid(self.model(x_pre, x_post))
 
 	def shared_step(self, batch):
-		x_pre = batch['pre_feat_mat']
-		x_post = batch['post_feat_mat']
+		if self.bert:
+			x_pre = {
+				'input_ids': batch['pre_input_ids'],
+				'token_type_ids': batch['pre_token_type_ids'],
+				'attention_mask': batch['pre_attention_mask']
+			}
+			x_post = {
+				'input_ids': batch['post_input_ids'],
+				'token_type_ids': batch['post_token_type_ids'],
+				'attention_mask': batch['post_attention_mask']
+			}
+		else:
+			x_pre = batch['pre_feat_mat']
+			x_post = batch['post_feat_mat']
 		y = batch['label']
 		logits = self.model(x_pre, x_post)
 
@@ -117,8 +139,9 @@ class STRPrePostClassifier(pl.LightningModule):
 		else:
 			weight = self.pos_weight
 
-		loss = F.binary_cross_entropy_with_logits(logits, y.unsqueeze(1).float(),
-													weight=weight)
+		loss = F.binary_cross_entropy_with_logits(
+			logits, y.unsqueeze(1).float(), weight=weight
+		)
 		return loss, logits, y
 
 	def training_step(self, batch, batch_idx):
@@ -148,8 +171,22 @@ class STRPrePostClassifier(pl.LightningModule):
 		}
 
 	def configure_optimizers(self):
+<<<<<<< HEAD
 		if self.reduce_lr_on_plateau:
 			optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
+=======
+		if self.bert:
+			params = [
+				{'params': self.model.feature_extractor.parameters(), 
+				 'lr': self.fe_learning_rate},
+				{'params': self.model.predictor.parameters()}
+			]
+		else:
+			params = self.parameters()
+
+		if self.reduce_lr_on_plateau:
+			optimizer = torch.optim.Adam(params, lr=self.learning_rate)
+>>>>>>> 97643066ff3a4e6deb32774f40b99581470056b1
 			scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
 				optimizer, 
 				factor=self.reduce_lr_factor, 
@@ -164,7 +201,11 @@ class STRPrePostClassifier(pl.LightningModule):
 				}
 			}
 		else:
+<<<<<<< HEAD
 			return torch.optim.Adam(self.parameters(), lr=self.learning_rate)
+=======
+			return torch.optim.Adam(params, lr=self.learning_rate)
+>>>>>>> 97643066ff3a4e6deb32774f40b99581470056b1
 
 
 class STRRegressor(pl.LightningModule):
