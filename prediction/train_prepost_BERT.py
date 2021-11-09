@@ -1,6 +1,7 @@
 import os
 import json
 
+
 import pytorch_lightning as pl
 import numpy as np
 import pandas as pd
@@ -8,36 +9,56 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 from data_modules import STRHetPrePostDataModule
-from models import STRPrePostClassifier, PrePostModel, InceptionPrePostModel
+from models import STRPrePostClassifier, PrePostModel, ConcatPredictor
+from models import ConcatPredictorBert
+from feature_extractors import DNABERT
+
+from dnabert.transformers.tokenization_bert import BertTokenizer
+
 
 
 if __name__ == '__main__':
 
 	# options
+	bert_save_dir = 'dnabert/5-new-12w-0/'
+	bert_k = 5
+
 	from_checkpoint = False
 	checkpoint_path = 'heterozygosity_logs/resnet_1/version_4/checkpoints/epoch=27-last.ckpt'
+
+	# Load BERT tokenizer
+	tokenizer = BertTokenizer.from_pretrained(
+		bert_save_dir,
+		do_lower_case=False,
+		from_tf=False
+	)
 
 	# Load
 	data_dir = os.path.join('..', 'data', 'heterozygosity', 'samples_prepost_2')
 	split_file = 'split_1_nc6.json'
 
 	task_log_dir = 'heterozygosity_logs'
-	model_log_dir = 'incep_4_2_pp_nc6'
+	model_log_dir = 'incep_4_2_pp_nc6_bert'
 
 	data = STRHetPrePostDataModule(
 		data_dir, 
 		split_file, 
 		batch_size=64,
-		num_workers=3
+		num_workers=3,
+		tokenizer=tokenizer,
+		k=bert_k	
 	)
 
-	# incep_2
-	net = InceptionPrePostModel()
+	# Create model
+	fe = DNABERT(bert_save_dir)
+	cls_module = ConcatPredictorBert()
+	net = PrePostModel(feature_extractor=fe, predictor=cls_module)
 	model = STRPrePostClassifier(
 		net, 
 		learning_rate=1e-3, 
 		reduce_lr_on_plateau=True,
-		patience=10
+		patience=10,
+		bert=True,
 	)
 
 	callbacks = [

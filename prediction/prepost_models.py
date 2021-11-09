@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 import cnn_models
+import feature_extractors
 
 
 class PrePostModel(nn.Module):
@@ -40,6 +41,29 @@ class ConcatPredictor(nn.Module):
 
     def forward(self, pre_embed, post_embed):
         x = torch.cat((pre_embed, post_embed), dim=-1)
+        return self.predictor(x)
+
+
+class ConcatPredictorBert(nn.Module):
+    """ Predictor which concatenates pre and post BERT embeddings on last 
+    axis (position) before passing 2 layer classifier.
+
+    Attributes:
+        embedding_dim: Dimension of embeddings.
+        predictor: Module which predicts logits.
+    """
+    def __init__(self):
+        super(ConcatPredictorBert, self).__init__()
+        self.predictor = nn.Sequential(
+            nn.Dropout(0.25),
+            nn.Linear(1536, 100),
+            nn.GELU(),
+            nn.Dropout(0.25),
+            nn.Linear(100, 1),
+        )
+
+    def forward(self, pre_embed, post_embed):
+        x = torch.cat((pre_embed[1], post_embed[1]), dim=-1)
         return self.predictor(x)
 
 
