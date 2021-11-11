@@ -158,10 +158,26 @@ class STRPrePostClassifier(pl.LightningModule):
 		self.log("test_loss", loss, prog_bar=True)
 
 	def predict_step(self, batch, batch_idx: int, dataloader_idx: int = None):
-		return {
-			'y_hat': self(batch['pre_feat_mat'], batch['post_feat_mat']).flatten(), 
-			'y_true': batch['label']
-		}
+		if self.bert:
+			x_pre = {
+				'input_ids': batch['pre_input_ids'],
+				'token_type_ids': batch['pre_token_type_ids'],
+				'attention_mask': batch['pre_attention_mask']
+			}
+			x_post = {
+				'input_ids': batch['post_input_ids'],
+				'token_type_ids': batch['post_token_type_ids'],
+				'attention_mask': batch['post_attention_mask']
+			}
+			return {
+				'y_hat': self(x_pre, x_post).flatten(), 
+				'y_true': batch['label']
+			}
+		else:
+			return {
+				'y_hat': self(batch['pre_feat_mat'], batch['post_feat_mat']).flatten(), 
+				'y_true': batch['label']
+			}
 
 	def configure_optimizers(self):
 		if self.bert:

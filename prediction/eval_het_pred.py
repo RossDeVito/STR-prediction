@@ -83,7 +83,7 @@ if __name__ == '__main__':
 
 		preds = trainer.predict(
 			model=model, 
-			dataloaders=data_mod.val_dataloader()
+			dataloaders=data_mod.test_dataloader()
 		)
 
 		y_pred = torch.cat([r['y_hat'].cpu() for r in preds])

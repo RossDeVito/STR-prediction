@@ -43,7 +43,7 @@ if __name__ == '__main__':
 	data = STRHetPrePostDataModule(
 		data_dir, 
 		split_file, 
-		batch_size=16,
+		batch_size=5,
 		num_workers=3,
 		tokenizer=tokenizer,
 		k=bert_k	
@@ -57,8 +57,10 @@ if __name__ == '__main__':
 		net, 
 		learning_rate=1e-3, 
 		reduce_lr_on_plateau=True,
-		patience=10,
+		patience=6, #fmr 10
 		bert=True,
+		pos_weight=1.5,
+		fe_learning_rate=1e-6
 	)
 
 	callbacks = [
@@ -91,6 +93,7 @@ if __name__ == '__main__':
 			logger=tb_logger,
 			gpus=1, 
 			log_every_n_steps=1, 
+			accumulate_grad_batches=25,	# fmr 16
 			# max_epochs=3, 
 			# limit_train_batches=20,
 			# limit_val_batches=20,
