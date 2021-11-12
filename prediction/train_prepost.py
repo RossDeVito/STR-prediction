@@ -9,36 +9,47 @@ import matplotlib.pyplot as plt
 
 from data_modules import STRHetPrePostDataModule
 from models import STRPrePostClassifier, PrePostModel, InceptionPrePostModel
+from models import STRPrePostRegressor
 
 
 if __name__ == '__main__':
-
 	# options
+	regression = True
+
 	from_checkpoint = False
 	checkpoint_path = 'heterozygosity_logs/resnet_1/version_4/checkpoints/epoch=27-last.ckpt'
 
 	# Load
-	data_dir = os.path.join('..', 'data', 'heterozygosity', 'samples_prepost_2')
-	split_file = 'split_1_nc6.json'
+	data_dir = os.path.join('..', 'data', 'repeat_num', 'samples_pp')
+	split_file = 'split_1.json'
 
-	task_log_dir = 'heterozygosity_logs'
-	model_log_dir = 'incep_4_2_pp_nc6'
+	task_log_dir = 'repeat_num_logs'
+	model_log_dir = 'incep_4_2_pp'
 
 	data = STRHetPrePostDataModule(
 		data_dir, 
 		split_file, 
 		batch_size=64,
-		num_workers=3
+		num_workers=3,
+		is_binary=(not regression),
 	)
 
 	# incep_2
 	net = InceptionPrePostModel()
-	model = STRPrePostClassifier(
-		net, 
-		learning_rate=1e-3, 
-		reduce_lr_on_plateau=True,
-		patience=10
-	)
+	if regression:
+		model = STRPrePostRegressor(
+			net, 
+			learning_rate=1e-3, 
+			reduce_lr_on_plateau=True,
+			patience=7
+		)
+	else:
+		model = STRPrePostClassifier(
+			net, 
+			learning_rate=1e-3, 
+			reduce_lr_on_plateau=True,
+			patience=7
+		)
 
 	callbacks = [
 		pl.callbacks.EarlyStopping('val_loss', verbose=True, patience=25),
@@ -71,9 +82,9 @@ if __name__ == '__main__':
 			gpus=1, 
 			log_every_n_steps=1, 
 			# max_epochs=3, 
-			# limit_train_batches=20,
-			# limit_val_batches=20,
-			# limit_test_batches=20,
+			# limit_train_batches=200,
+			# limit_val_batches=200,
+			# limit_test_batches=200,
 			# auto_lr_find=True
 		)
 
@@ -85,7 +96,7 @@ if __name__ == '__main__':
 
 	best_val = trainer.test(
 		ckpt_path='best', 
-		test_dataloaders=data.val_dataloader()
+		test_dataloaders=data.test_dataloader()
 	)
 
 	print("Best validation Results")

@@ -266,6 +266,128 @@ class STRRegressor(pl.LightningModule):
 		return torch.optim.Adam(self.parameters(), lr=self.learning_rate)
 
 
+class STRPrePostRegressor(pl.LightningModule):
+	def __init__(self, model, learning_rate=1e-3,
+			reduce_lr_on_plateau=False, reduce_lr_factor=0.1, patience=10,
+			bert=False, fe_learning_rate=1e-5):
+		super().__init__()
+		self.model = model
+		self.learning_rate = learning_rate
+		self.reduce_lr_on_plateau = reduce_lr_on_plateau
+		self.reduce_lr_factor = reduce_lr_factor
+		self.patience = patience
+		self.bert = bert
+		self.fe_learning_rate = fe_learning_rate
+
+		self.save_hyperparameters('learning_rate', 'reduce_lr_on_plateau', 
+			'reduce_lr_factor', 'patience', 'bert', 'fe_learning_rate')
+
+		# Metrics
+		metrics = MetricCollection({
+			'R2Score': R2Score(),
+			'VarWeightedR2Score': R2Score(multioutput='variance_weighted'),
+		})
+		self.train_metrics = metrics.clone(prefix='train_')
+		self.val_metrics = metrics.clone(prefix='val_')
+		self.test_metrics = metrics.clone(prefix='test_')
+
+	def forward(self, x_pre, x_post):
+		return self.model(x_pre, x_post)
+
+	def shared_step(self, batch):
+		if self.bert:
+			x_pre = {
+				'input_ids': batch['pre_input_ids'],
+				'token_type_ids': batch['pre_token_type_ids'],
+				'attention_mask': batch['pre_attention_mask']
+			}
+			x_post = {
+				'input_ids': batch['post_input_ids'],
+				'token_type_ids': batch['post_token_type_ids'],
+				'attention_mask': batch['post_attention_mask']
+			}
+		else:
+			x_pre = batch['pre_feat_mat']
+			x_post = batch['post_feat_mat']
+		y = batch['label']
+		y_hat = self.model(x_pre, x_post).flatten()
+
+		loss = F.mse_loss(
+			y_hat, y.float()
+		)
+		return loss, y_hat, y
+
+	def training_step(self, batch, batch_idx):
+		loss, logits, y = self.shared_step(batch)
+		metrics_dict = self.train_metrics(F.sigmoid(logits), y.long())
+		self.log_dict(metrics_dict, on_epoch=True)
+		self.log("train_loss", loss, on_step=True, on_epoch=True,
+					prog_bar=True)
+		return loss
+
+	def validation_step(self, batch, batch_idx):
+		loss, logits, y = self.shared_step(batch)
+		metrics_dict = self.val_metrics(F.sigmoid(logits), y.long())
+		self.log_dict(metrics_dict, prog_bar=True)
+		self.log("val_loss", loss, prog_bar=True)
+
+	def test_step(self, batch, batch_idx):
+		loss, logits, y = self.shared_step(batch)
+		metrics_dict = self.test_metrics(F.sigmoid(logits), y.long())
+		self.log_dict(metrics_dict, prog_bar=True)
+		self.log("test_loss", loss, prog_bar=True)
+
+	def predict_step(self, batch, batch_idx: int, dataloader_idx: int = None):
+		if self.bert:
+			x_pre = {
+				'input_ids': batch['pre_input_ids'],
+				'token_type_ids': batch['pre_token_type_ids'],
+				'attention_mask': batch['pre_attention_mask']
+			}
+			x_post = {
+				'input_ids': batch['post_input_ids'],
+				'token_type_ids': batch['post_token_type_ids'],
+				'attention_mask': batch['post_attention_mask']
+			}
+			return {
+				'y_hat': self(x_pre, x_post).flatten(), 
+				'y_true': batch['label']
+			}
+		else:
+			return {
+				'y_hat': self(batch['pre_feat_mat'], batch['post_feat_mat']).flatten(), 
+				'y_true': batch['label']
+			}
+
+	def configure_optimizers(self):
+		if self.bert:
+			params = [
+				{'params': self.model.feature_extractor.parameters(), 
+				 'lr': self.fe_learning_rate},
+				{'params': self.model.predictor.parameters()}
+			]
+		else:
+			params = self.parameters()
+
+		if self.reduce_lr_on_plateau:
+			optimizer = torch.optim.Adam(params, lr=self.learning_rate)
+			scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+				optimizer, 
+				factor=self.reduce_lr_factor, 
+				patience=self.patience,
+				verbose=True
+			)
+			return {
+				'optimizer': optimizer,
+				'lr_scheduler': {
+					'scheduler': scheduler,
+					'monitor': 'val_loss',
+				}
+			}
+		else:
+			return torch.optim.Adam(params, lr=self.learning_rate)
+
+
 class basic_CNN(nn.Module):
 	def __init__(self, seq_len, n_channels=7, output_dim=1):
 		super().__init__()

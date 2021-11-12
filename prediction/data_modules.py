@@ -116,24 +116,35 @@ class STRHetPrePostDataset(STRDataset):
 		k: Tokenizer will be used to split sequences into k-mers.
 	"""	
 	def __init__(self, data_dir, split_file, split_name, n_per_side=500,
-					tokenizer=None, k=5):
+					tokenizer=None, k=5, is_binary=True):
 		super().__init__(data_dir, split_file, split_name)
 		self.n_per_side = n_per_side
 		self.tokenizer = tokenizer
 		self.k = k
+		self.is_binary = is_binary
 
 	def _get_item_5_feat_mat(self, item_data):
 		feat_mat = np.load(os.path.join(self.data_dir, item_data['fname']))
 
-		return {
-			'pre_feat_mat': torch.tensor(feat_mat[:, :self.n_per_side]).float(),
-			'post_feat_mat': torch.tensor(feat_mat[:, -self.n_per_side:]).float(),
-			'pre_seq_string': item_data['seq_string'][:self.n_per_side],
-			'post_seq_string': item_data['seq_string'][-self.n_per_side:],
-			'chr_loc': item_data['chr_loc'],
-			'label': torch.tensor(item_data['label'] > 0).float(),
-			'label_val': torch.tensor(item_data['label']).float()
-		}
+		if self.is_binary:
+			return {
+				'pre_feat_mat': torch.tensor(feat_mat[:, :self.n_per_side]).float(),
+				'post_feat_mat': torch.tensor(feat_mat[:, -self.n_per_side:]).float(),
+				'pre_seq_string': item_data['seq_string'][:self.n_per_side],
+				'post_seq_string': item_data['seq_string'][-self.n_per_side:],
+				'chr_loc': item_data['chr_loc'],
+				'label': torch.tensor(item_data['label'] > 0).float(),
+				'label_val': torch.tensor(item_data['label']).float()
+			}
+		else:
+			return {
+				'pre_feat_mat': torch.tensor(feat_mat[:, :self.n_per_side]).float(),
+				'post_feat_mat': torch.tensor(feat_mat[:, -self.n_per_side:]).float(),
+				'pre_seq_string': item_data['seq_string'][:self.n_per_side],
+				'post_seq_string': item_data['seq_string'][-self.n_per_side:],
+				'chr_loc': item_data['chr_loc'],
+				'label': torch.tensor(item_data['label']).float()
+			}
 
 	def tokenize_seq_str(self, seq_str):
 		""" Pre-tokenize sequences into kmers using sliding window,
@@ -161,19 +172,33 @@ class STRHetPrePostDataset(STRDataset):
 		pre_feats = self.tokenize_seq_str(pre_seq_string)
 		post_feats = self.tokenize_seq_str(post_seq_string)
 
-		return {
-			'pre_input_ids': pre_feats['input_ids'][0],
-			'pre_token_type_ids': pre_feats['token_type_ids'][0],
-			'pre_attention_mask': pre_feats['attention_mask'][0],
-			'post_input_ids': post_feats['input_ids'][0],
-			'post_token_type_ids': post_feats['token_type_ids'][0],
-			'post_attention_mask': post_feats['attention_mask'][0],
-			'pre_seq_string': pre_seq_string,
-			'post_seq_string': post_seq_string,
-			'chr_loc': item_data['chr_loc'],
-			'label': torch.tensor(item_data['label'] > 0).float(),
-			'label_val': torch.tensor(item_data['label']).float()
-		}
+		if self.is_binary:
+			return {
+				'pre_input_ids': pre_feats['input_ids'][0],
+				'pre_token_type_ids': pre_feats['token_type_ids'][0],
+				'pre_attention_mask': pre_feats['attention_mask'][0],
+				'post_input_ids': post_feats['input_ids'][0],
+				'post_token_type_ids': post_feats['token_type_ids'][0],
+				'post_attention_mask': post_feats['attention_mask'][0],
+				'pre_seq_string': pre_seq_string,
+				'post_seq_string': post_seq_string,
+				'chr_loc': item_data['chr_loc'],
+				'label': torch.tensor(item_data['label'] > 0).float(),
+				'label_val': torch.tensor(item_data['label']).float()
+			}
+		else:
+			return {
+				'pre_input_ids': pre_feats['input_ids'][0],
+				'pre_token_type_ids': pre_feats['token_type_ids'][0],
+				'pre_attention_mask': pre_feats['attention_mask'][0],
+				'post_input_ids': post_feats['input_ids'][0],
+				'post_token_type_ids': post_feats['token_type_ids'][0],
+				'post_attention_mask': post_feats['attention_mask'][0],
+				'pre_seq_string': pre_seq_string,
+				'post_seq_string': post_seq_string,
+				'chr_loc': item_data['chr_loc'],
+				'label': torch.tensor(item_data['label']).float()
+			}
 
 	def __getitem__(self, idx):
 		""" Return pre- and post-sequence features is 5-feat or BERT format. """
@@ -189,24 +214,26 @@ class STRHetPrePostDataset(STRDataset):
 class STRHetPrePostDataModule(STRDataModule):
 	"""Takes labels from regression and makes into >0 classification problem."""
 	def __init__(self, data_dir, split_file, batch_size = 32, num_workers = 1,
-					shuffle = True, n_per_side = 500, tokenizer = None, k = 5):
+					shuffle = True, n_per_side = 500, tokenizer = None, k = 5,
+					is_binary=True):
 		super().__init__(data_dir, split_file, batch_size, num_workers, shuffle)
 		self.n_per_side = n_per_side
 		self.tokenizer = tokenizer
 		self.k = k
+		self.is_binary = is_binary
 
 	def setup(self, stage=None):
 		self.train_data = STRHetPrePostDataset(
 			self.data_dir, self.split_file, 'train', self.n_per_side,
-			self.tokenizer, self.k
+			self.tokenizer, self.k, self.is_binary
 		)
 		self.val_data = STRHetPrePostDataset(
 			self.data_dir, self.split_file, 'val', self.n_per_side,
-			self.tokenizer, self.k
+			self.tokenizer, self.k, self.is_binary
 		)
 		self.test_data = STRHetPrePostDataset(
 			self.data_dir, self.split_file, 'test', self.n_per_side,
-			self.tokenizer, self.k
+			self.tokenizer, self.k, self.is_binary
 		)
 
 

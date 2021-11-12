@@ -12,12 +12,14 @@ data/HipSTR-references/*.json
 trained_models/*
 prediction/dnabert/5-new-12w-0/*.bin
 prediction/dnabert/6-new-12w-0/*.bin
-
+data/repeat_num/*
+!data/repeat_num/README.md
 
 data/mecp2_binding/samples/*
 
 prediction/mecp2_logs/*
 prediction/heterozygosity_logs/*
+prediction/repeat_num_logs/*
 prediction/lightning_logs/*
 prediction/lr_find_temp_model.ckpt
 

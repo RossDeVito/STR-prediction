@@ -74,11 +74,11 @@ if __name__ == '__main__':
 	max_STR_len = 100
 	n_per_side = 500
 
-	min_num_called = 100 # if None will skip, for het task
+	min_num_called = None # if None will skip, for het task
 
 	# Load labeled STRs to be preprocessed
-	samp_dir = os.path.join('..', 'data', 'heterozygosity')
-	samp_fname = 'labeled_samples_het.json'
+	samp_dir = os.path.join('..', 'data', 'repeat_num')
+	samp_fname = 'labeled_samples_repeat_num.json'
 	samp_path = os.path.join(samp_dir, samp_fname)
 
 	with open(samp_path) as fp:    
@@ -87,7 +87,7 @@ if __name__ == '__main__':
 	sample_data = []
 	labels = []
 
-	save_dir = os.path.join('..', 'data', 'heterozygosity', 'samples_prepost_2')
+	save_dir = os.path.join('..', 'data', 'repeat_num', 'samples_pp')
 
 	# Filter samples by STR length, then create formatted output_seq_len samples
 	for i in tqdm(range(len(samples))):
