@@ -5,6 +5,7 @@ length over threshold, and saves resulting samples in a JSON fine
 
 import json
 import os
+import sys
 import math
 
 import numpy as np
@@ -90,7 +91,7 @@ if __name__ == '__main__':
 	save_dir = os.path.join('..', 'data', 'repeat_num', 'samples_pp')
 
 	# Filter samples by STR length, then create formatted output_seq_len samples
-	for i in tqdm(range(len(samples))):
+	for i in tqdm(range(len(samples)), file=sys.stdout):
 		samp_dict = samples.pop(0)
 
 		# filter out by STR length

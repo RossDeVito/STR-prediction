@@ -29,7 +29,7 @@ if __name__ == '__main__':
 	data = STRHetPrePostDataModule(
 		data_dir, 
 		split_file, 
-		batch_size=64,
+		batch_size=128,
 		num_workers=3,
 		is_binary=(not regression),
 	)
