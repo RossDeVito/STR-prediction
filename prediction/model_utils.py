@@ -18,6 +18,8 @@ def get_activation_fn(activation):
 		return nn.Tanh()
 	elif activation == 'sigmoid':
 		return nn.Sigmoid()
+	elif activation == 'gelu':
+		return nn.GELU()
 	elif activation == 'none':
 		return nn.Identity()
 	else:

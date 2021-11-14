@@ -35,7 +35,15 @@ if __name__ == '__main__':
 	)
 
 	# incep_2
-	net = InceptionPrePostModel()
+	# net = InceptionPrePostModel()
+	net = InceptionPrePostModel(
+		depth_fe=6,
+		n_filters_fe=64,
+		depth_pred=3,
+		n_filters_pred=64,
+		kernel_sizes=[3,7,15,39],
+		activation='gelu'
+	)
 	if regression:
 		model = STRPrePostRegressor(
 			net, 
