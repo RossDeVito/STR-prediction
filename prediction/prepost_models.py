@@ -81,7 +81,7 @@ class InceptionPrePostModel(PrePostModel):
             ),
             predictor=ConcatPredictor(
                 cnn_models.InceptionTime(
-                    in_channels=in_channels, 
+                    in_channels=n_filters_fe*(len(kernel_sizes)+1),
                     n_filters=n_filters_pred,
                     kernel_sizes=kernel_sizes, 
                     depth=depth_pred,
