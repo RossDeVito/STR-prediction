@@ -86,7 +86,7 @@ if __name__ == '__main__':
 
 	# Eval non-BERT models
 	data_dir = os.path.join('..', 'data', 'heterozygosity', 'samples_prepost_2')
-	split_file = 'split_1.json'
+	split_file = 'split_1_nc6.json'
 
 	data_mod = STRHetPrePostDataModule(
 		data_dir, 
