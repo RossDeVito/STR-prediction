@@ -47,9 +47,9 @@ if __name__ == '__main__':
 	if regression:
 		model = STRPrePostRegressor(
 			net, 
-			learning_rate=1e-3, 
+			learning_rate=1e-2, 
 			reduce_lr_on_plateau=True,
-			patience=7
+			patience=5
 		)
 	else:
 		model = STRPrePostClassifier(
