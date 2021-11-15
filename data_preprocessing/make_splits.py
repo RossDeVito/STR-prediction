@@ -58,7 +58,7 @@ if __name__ == '__main__':
 	train_ratio = .7
 	test_ratio = .15
 
-	sample_data_dir = os.path.join('..', 'data', 'repeat_num', 'samples_pp')
+	sample_data_dir = os.path.join('..', 'data', 'mecp2_binding', 'samples_pp')
 	sample_data_path = os.path.join(sample_data_dir, 'sample_data.json')
 
 	# Load sample data

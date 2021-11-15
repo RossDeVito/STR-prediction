@@ -78,8 +78,8 @@ if __name__ == '__main__':
 	min_num_called = None # if None will skip, for het task
 
 	# Load labeled STRs to be preprocessed
-	samp_dir = os.path.join('..', 'data', 'repeat_num')
-	samp_fname = 'labeled_samples_repeat_num.json'
+	samp_dir = os.path.join('..', 'data', 'mecp2_binding')
+	samp_fname = 'labeled_samples_mecp2.json'
 	samp_path = os.path.join(samp_dir, samp_fname)
 
 	with open(samp_path) as fp:    
@@ -88,7 +88,7 @@ if __name__ == '__main__':
 	sample_data = []
 	labels = []
 
-	save_dir = os.path.join('..', 'data', 'repeat_num', 'samples_pp')
+	save_dir = os.path.join('..', 'data', 'mecp2_binding', 'samples_pp')
 
 	# Filter samples by STR length, then create formatted output_seq_len samples
 	for i in tqdm(range(len(samples)), file=sys.stdout):
@@ -121,10 +121,10 @@ if __name__ == '__main__':
 		# 	break
 
 	# Print stats
-	# labels = np.array(labels)
-	# print("Total samples:\t{}".format(len(labels)))
-	# print("\t0:\t{}".format(((labels == 0).sum())))
-	# print("\t1:\t{}".format(((labels > 0).sum())))
+	labels = np.array(labels)
+	print("Total samples:\t{}".format(len(labels)))
+	print("\t0:\t{}".format(((labels == 0).sum())))
+	print("\t1:\t{}".format(((labels > 0).sum())))
 
 	# Save JSON of preprocessed samples
 	this_sample_set_fname = 'sample_data.json'

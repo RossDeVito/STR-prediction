@@ -20,30 +20,30 @@ if __name__ == '__main__':
 	checkpoint_path = 'heterozygosity_logs/resnet_1/version_4/checkpoints/epoch=27-last.ckpt'
 
 	# Load
-	data_dir = os.path.join('..', 'data', 'repeat_num', 'samples_pp')
+	data_dir = os.path.join('..', 'data', 'mecp2_binding', 'samples_pp')
 	split_file = 'split_1.json'
 
-	task_log_dir = 'repeat_num_logs'
+	task_log_dir = 'mecp2_logs'
 	model_log_dir = 'incep_4_2_pp'
 
 	data = STRHetPrePostDataModule(
 		data_dir, 
 		split_file, 
-		batch_size=128,
+		batch_size=64,
 		num_workers=3,
 		is_binary=(not regression),
 	)
 
 	# incep_2
-	# net = InceptionPrePostModel()
-	net = InceptionPrePostModel(
-		depth_fe=6,
-		n_filters_fe=64,
-		depth_pred=3,
-		n_filters_pred=64,
-		kernel_sizes=[3,7,15,39],
-		activation='gelu'
-	)
+	net = InceptionPrePostModel()
+	# net = InceptionPrePostModel(
+	# 	depth_fe=6,
+	# 	n_filters_fe=64,
+	# 	depth_pred=3,
+	# 	n_filters_pred=64,
+	# 	kernel_sizes=[3,7,15,39],
+	# 	activation='gelu'
+	# )
 	if regression:
 		model = STRPrePostRegressor(
 			net, 
@@ -89,10 +89,10 @@ if __name__ == '__main__':
 			logger=tb_logger,
 			gpus=1, 
 			log_every_n_steps=1, 
-			# max_epochs=3, 
-			# limit_train_batches=200,
-			# limit_val_batches=200,
-			# limit_test_batches=200,
+			max_epochs=3, 
+			limit_train_batches=200,
+			limit_val_batches=200,
+			limit_test_batches=200,
 			# auto_lr_find=True
 		)
 
