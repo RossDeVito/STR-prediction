@@ -16,9 +16,11 @@ data/repeat_num/*
 !data/repeat_num/README.md
 
 data/mecp2_binding/samples/*
+data/mecp2_binding/samples_pp/*
 
 prediction/mecp2_logs/*
 prediction/heterozygosity_logs/*
+prediction/mecp2_logs/*
 prediction/repeat_num_logs/*
 prediction/lightning_logs/*
 prediction/lr_find_temp_model.ckpt
