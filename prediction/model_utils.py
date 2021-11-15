@@ -24,3 +24,17 @@ def get_activation_fn(activation):
 		return nn.Identity()
 	else:
 		raise ValueError('Invalid activation function')
+
+
+def count_params(model, trainable_only=True):
+	"""Count number of parameters in a model
+	Args:
+		model (nn.Module): model to count parameters
+		trainable_only (bool): count only trainable parameters
+	Returns:
+		number of parameters
+	"""
+	if trainable_only:
+		return sum(p.numel() for p in model.parameters() if p.requires_grad)
+	else:
+		return sum(p.numel() for p in model.parameters())

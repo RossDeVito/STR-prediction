@@ -11,6 +11,9 @@ from data_modules import STRHetPrePostDataModule
 from models import STRPrePostClassifier, PrePostModel, InceptionPrePostModel
 from models import STRPrePostRegressor
 
+import cnn_models
+import enformer_models
+
 
 if __name__ == '__main__':
 	# options
@@ -24,7 +27,7 @@ if __name__ == '__main__':
 	split_file = 'split_1_nc6.json'
 
 	task_log_dir = 'heterozygosity_logs'
-	model_log_dir = 'incep_4_2_pp_nc6'
+	model_log_dir = 'enf_v1_pp_nc6'
 
 	data = STRHetPrePostDataModule(
 		data_dir, 
@@ -36,13 +39,24 @@ if __name__ == '__main__':
 
 	# incep_2
 	# net = InceptionPrePostModel()
-	net = InceptionPrePostModel(
-		depth_fe=6,
-		n_filters_fe=64,
-		depth_pred=3,
-		n_filters_pred=64,
-		kernel_sizes=[3,7,15,39],
-		activation='gelu'
+	# net = InceptionPrePostModel(
+	# 	depth_fe=6,
+	# 	n_filters_fe=64,
+	# 	depth_pred=3,
+	# 	n_filters_pred=64,
+	# 	kernel_sizes=[3,7,15,39],
+	# 	activation='gelu'
+	# )
+	net = PrePostModel(
+		feature_extractor=cnn_models.InceptionBlock(
+				in_channels=5, 
+				depth=6,
+				activation='gelu'
+			),
+		predictor=enformer_models.EncoderPredictor(
+			d_model=128,
+			num_layers=3
+		)
 	)
 	if regression:
 		model = STRPrePostRegressor(

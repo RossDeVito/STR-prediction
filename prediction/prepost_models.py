@@ -44,6 +44,30 @@ class ConcatPredictor(nn.Module):
         return self.predictor(x)
 
 
+class ConcatPredictorEncoder(nn.Module):
+    """ Predictor which concatenates pre and post embeddings on last 
+    axis (position) before transposing last two dimensions to pass to
+    an encoder. Output of that is globalmaxpooled and passed to a
+    classifier.
+
+    Attributes:
+        embedding_dim: Dimension of embeddings.
+        encoder:
+        predictor: Module which predicts logits.
+    """
+    def __init__(self, encoder, predictor):
+        super().__init__()
+        self.encoder = encoder
+        self.predictor = predictor
+
+    def forward(self, pre_embed, post_embed):
+        x = torch.cat((pre_embed, post_embed), dim=-1)
+        x = x.transpose(1,2)
+        x = self.encoder(x)
+        x = x.max(dim=1).values
+        return self.predictor(x)
+
+
 class ConcatPredictorBert(nn.Module):
     """ Predictor which concatenates pre and post BERT embeddings on last 
     axis (position) before passing 2 layer classifier.
