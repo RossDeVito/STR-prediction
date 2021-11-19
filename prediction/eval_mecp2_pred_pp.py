@@ -30,114 +30,42 @@ def make_DNABERT_model(bert_save_dir):
 
 
 if __name__ == '__main__':
+	# to use GPU/CPU
+	gpus = 1
+
+	# models to eval
 	models_to_eval = [
 		# {   'name': 'Inception v1 (4,2), bs128',
 		# 	'model': InceptionPrePostModel(),
-		# 	'load_path': '../trained_models/heterozygosity_bin_prepost/incep_v1_4_2_bs128/checkpoints/epoch=17-best_val_loss.ckpt'
+		# 	'load_path': '../trained_models/mecp2_pp/incep_v1_4_2_bs128/checkpoints/epoch=4-best_val_loss.ckpt'
 		# },
-		{   'name': 'Inception v1 (4,2), bs128 last',
-			'model': InceptionPrePostModel(),
-			'load_path': '../trained_models/heterozygosity_bin_prepost/incep_v1_4_2_bs128/checkpoints/epoch=42-last.ckpt'
+		# {   'name': 'Inception v1 (4,2), bs128 last',
+		# 	'model': InceptionPrePostModel(),
+		# 	'load_path': '../trained_models/mecp2_pp/incep_v1_4_2_bs128/checkpoints/epoch=15-last.ckpt'
+		# },
+		{   'name': 'Inception v1 (6,3), bs128 f(3,7,15,39)',
+			'model': InceptionPrePostModel(
+				depth_fe=6,
+				n_filters_fe=64,
+				depth_pred=3,
+				n_filters_pred=64,
+				kernel_sizes=[3,7,15,39],
+				activation='gelu'
+			),
+			'load_path': '../trained_models/mecp2_pp/incep_v1_6_3_bs128/checkpoints/epoch=28-best_val_loss.ckpt'
 		},
-		{   'name': 'Inception v1 (4,2), bs256',
-			'model': InceptionPrePostModel(),
-			'load_path': '../trained_models/heterozygosity_bin_prepost/incep_v1_4_2_bs256/checkpoints/epoch=25-best_val_loss.ckpt'
+		{   'name': 'Inception v1 (6,3), bs128 f(3,7,15,39) last',
+			'model': InceptionPrePostModel(
+				depth_fe=6,
+				n_filters_fe=64,
+				depth_pred=3,
+				n_filters_pred=64,
+				kernel_sizes=[3,7,15,39],
+				activation='gelu'
+			),
+			'load_path': '../trained_models/mecp2_pp/incep_v1_6_3_bs128/checkpoints/epoch=39-last.ckpt'
 		},
-		{   'name': 'Inception v1 (4,2), bs256 last',
-			'model': InceptionPrePostModel(),
-			'load_path': '../trained_models/heterozygosity_bin_prepost/incep_v1_4_2_bs256/checkpoints/epoch=50-last.ckpt'
-		},
-		# {   'name': 'Inception v1 (6,3), bs64 f(3,7,15,39)',
-		# 	'model': InceptionPrePostModel(
-		# 		depth_fe=6,
-		# 		n_filters_fe=64,
-		# 		depth_pred=3,
-		# 		n_filters_pred=64,
-		# 		kernel_sizes=[3,7,15,39],
-		# 		activation='gelu'
-		# 	),
-		# 	'load_path': '../trained_models/heterozygosity_bin_prepost/incep_v1_6_3_bs64/checkpoints/epoch=13-best_val_loss.ckpt'
-		# },
-		# {   'name': 'Inception v1 (6,3), bs64 f(3,7,15,39) last',
-		# 	'model': InceptionPrePostModel(
-		# 		depth_fe=6,
-		# 		n_filters_fe=64,
-		# 		depth_pred=3,
-		# 		n_filters_pred=64,
-		# 		kernel_sizes=[3,7,15,39],
-		# 		activation='gelu'
-		# 	),
-		# 	'load_path': '../trained_models/heterozygosity_bin_prepost/incep_v1_6_3_bs64/checkpoints/epoch=38-last.ckpt'
-		# },
-		# {   'name': 'Inception v1 (6,3), bs128 f(3,9,19,39)',
-		# 	'model': InceptionPrePostModel(
-		# 		depth_fe=6,
-		# 		n_filters_fe=64,
-		# 		depth_pred=3,
-		# 		n_filters_pred=64,
-		# 		kernel_sizes=[3,9,19,39],
-		# 		activation='gelu'
-		# 	),
-		# 	'load_path': '../trained_models/heterozygosity_bin_prepost/incep_v1_6_3_bs128/checkpoints/epoch=38-last.ckpt'
-		# },
-		# {   'name': 'Inception v1 (6,3), bs128 f(3,9,19,39) last',
-		# 	'model': InceptionPrePostModel(
-		# 		depth_fe=6,
-		# 		n_filters_fe=64,
-		# 		depth_pred=3,
-		# 		n_filters_pred=64,
-		# 		kernel_sizes=[3,9,19,39],
-		# 		activation='gelu'
-		# 	),
-		# 	'load_path': '../trained_models/heterozygosity_bin_prepost/incep_v1_6_3_bs128/checkpoints/epoch=13-best_val_loss.ckpt'
-		# },
-		# {   'name': 'Inception v1 (4,2), bs128 pw2.0',
-		# 	'model': InceptionPrePostModel(),
-		# 	'load_path': '../trained_models/heterozygosity_bin_prepost/incep_v1_4_2_bs128_pw2/checkpoints/epoch=20-best_val_loss.ckpt'
-		# },
-		# {   'name': 'Inception v1 (4,2), bs128 pw2.0 last',
-		# 	'model': InceptionPrePostModel(),
-		# 	'load_path': '../trained_models/heterozygosity_bin_prepost/incep_v1_4_2_bs128_pw2/checkpoints/epoch=45-last.ckpt'
-		# },
-		# {   'name': 'Inception v1 (4,2), bs128 pw1.5',
-		# 	'model': InceptionPrePostModel(),
-		# 	'load_path': '../trained_models/heterozygosity_bin_prepost/incep_v1_4_2_bs128_pw1_5/checkpoints/epoch=9-best_val_loss.ckpt'
-		# },
-		# {   'name': 'Inception v1 (4,2), bs128 pw1.5 last',
-		# 	'model': InceptionPrePostModel(),
-		# 	'load_path': '../trained_models/heterozygosity_bin_prepost/incep_v1_4_2_bs128_pw1_5/checkpoints/epoch=34-last.ckpt'
-		# },
-		# {   'name': 'Inception v1 (4,2), bs128 do.4',
-		# 	'model': InceptionPrePostModel(),
-		# 	'load_path': '../trained_models/heterozygosity_bin_prepost/incep_v1_4_2_bs128_do4/checkpoints/epoch=35-best_val_loss.ckpt'
-		# },
-		# {   'name': 'Inception v1 (4,2), bs128 do.4 last',
-		# 	'model': InceptionPrePostModel(),
-		# 	'load_path': '../trained_models/heterozygosity_bin_prepost/incep_v1_4_2_bs128_do4/checkpoints/epoch=85-last.ckpt'
-		# },
-		# {   'name': 'Inception v1 (4,2), bs128 do.4',
-		# 	'model': InceptionPrePostModel(
-		# 		depth_fe=6,
-		# 		n_filters_fe=64,
-		# 		depth_pred=3,
-		# 		n_filters_pred=64,
-		# 		kernel_sizes=[3,7,15,39],
-		# 		activation='gelu'
-		# 	),
-		# 	'load_path': '../trained_models/heterozygosity_bin_prepost/incep_v1_6_3_bs128_do4/checkpoints/epoch=29-best_val_loss.ckpt'
-		# },
-		# {   'name': 'Inception v1 (6,3), bs64 f(3,7,15,39) do.4 last',
-		# 	'model': InceptionPrePostModel(
-		# 		depth_fe=6,
-		# 		n_filters_fe=64,
-		# 		depth_pred=3,
-		# 		n_filters_pred=64,
-		# 		kernel_sizes=[3,7,15,39],
-		# 		activation='gelu'
-		# 	),
-		# 	'load_path': '../trained_models/heterozygosity_bin_prepost/incep_v1_6_3_bs128_do4/checkpoints/epoch=29-best_val_loss.ckpt'
-		# },
-		# {   'name': 'Enformer v1 (4,2), bs32',
+        # {   'name': 'Enformer v1 (4,2), bs32 pw.1',
 		# 	'model': PrePostModel(
         #         feature_extractor=cnn_models.InceptionBlock(
         #             in_channels=5, 
@@ -151,9 +79,9 @@ if __name__ == '__main__':
         #             n_head=4,
         #         )
         #     ),
-		# 	'load_path': '../trained_models/heterozygosity_bin_prepost/enf_v1_4_2_bs32/checkpoints/epoch=10-best_val_loss.ckpt'
+		# 	'load_path': '../trained_models/mecp2_pp/enf_v1_4_2_bs32/checkpoints/epoch=19-best_val_loss.ckpt'
 		# },
-		# {   'name': 'Enformer v1 (4,2), bs32 last',
+        # {   'name': 'Enformer v1 (4,2), bs32 pw.1 last',
 		# 	'model': PrePostModel(
         #         feature_extractor=cnn_models.InceptionBlock(
         #             in_channels=5, 
@@ -167,9 +95,9 @@ if __name__ == '__main__':
         #             n_head=4,
         #         )
         #     ),
-		# 	'load_path': '../trained_models/heterozygosity_bin_prepost/enf_v1_4_2_bs32/checkpoints/epoch=60-last.ckpt'
+		# 	'load_path': '../trained_models/mecp2_pp/enf_v1_4_2_bs32/checkpoints/epoch=22-last.ckpt'
 		# },
-		{   'name': 'Enformer v1 (4,2), bs32',
+		{   'name': 'Enformer v1 (4,2), bs32 pw.1 cont',
 			'model': PrePostModel(
                 feature_extractor=cnn_models.InceptionBlock(
                     in_channels=5, 
@@ -183,9 +111,9 @@ if __name__ == '__main__':
                     n_head=4,
                 )
             ),
-			'load_path': '../trained_models/heterozygosity_bin_prepost/enf_v1_4_2_bs32_all/checkpoints/epoch=18-best_val_loss.ckpt'
+			'load_path': '../trained_models/mecp2_pp/enf_v1_4_2_bs32_cont/checkpoints/epoch=28-best_val_loss.ckpt'
 		},
-		{   'name': 'Enformer v1 (4,2), bs32 last',
+		{   'name': 'Enformer v1 (4,2), bs32 pw.1 cont last',
 			'model': PrePostModel(
                 feature_extractor=cnn_models.InceptionBlock(
                     in_channels=5, 
@@ -199,7 +127,51 @@ if __name__ == '__main__':
                     n_head=4,
                 )
             ),
-			'load_path': '../trained_models/heterozygosity_bin_prepost/enf_v1_4_2_bs32_all/checkpoints/epoch=20-last.ckpt'
+			'load_path': '../trained_models/mecp2_pp/enf_v1_4_2_bs32_cont/checkpoints/epoch=33-last.ckpt'
+		},
+		{   'name': 'Inception v1 (6,3), bs128 f(3,7,15,39) pw.1',
+			'model': InceptionPrePostModel(
+				depth_fe=6,
+				n_filters_fe=64,
+				depth_pred=3,
+				n_filters_pred=64,
+				kernel_sizes=[3,7,15,39],
+				activation='gelu'
+			),
+			'load_path': '../trained_models/mecp2_pp/incep_v1_6_3_bs128_pw1/checkpoints/epoch=57-best_val_loss.ckpt'
+		},
+		{   'name': 'Inception v1 (6,3), bs128 f(3,7,15,39) last pw.1',
+			'model': InceptionPrePostModel(
+				depth_fe=6,
+				n_filters_fe=64,
+				depth_pred=3,
+				n_filters_pred=64,
+				kernel_sizes=[3,7,15,39],
+				activation='gelu'
+			),
+			'load_path': '../trained_models/mecp2_pp/incep_v1_6_3_bs128_pw1/checkpoints/epoch=59-last.ckpt'
+		},
+		{   'name': 'Inception v1 (6,3), bs128 f(3,7,15,39) pw.2',
+			'model': InceptionPrePostModel(
+				depth_fe=6,
+				n_filters_fe=64,
+				depth_pred=3,
+				n_filters_pred=64,
+				kernel_sizes=[3,7,15,39],
+				activation='gelu'
+			),
+			'load_path': '../trained_models/mecp2_pp/incep_v1_6_3_bs128_pw2/checkpoints/epoch=47-best_val_loss.ckpt'
+		},
+		{   'name': 'Inception v1 (6,3), bs128 f(3,7,15,39) last pw.2',
+			'model': InceptionPrePostModel(
+				depth_fe=6,
+				n_filters_fe=64,
+				depth_pred=3,
+				n_filters_pred=64,
+				kernel_sizes=[3,7,15,39],
+				activation='gelu'
+			),
+			'load_path': '../trained_models/mecp2_pp/incep_v1_6_3_bs128_pw2/checkpoints/epoch=57-last.ckpt'
 		},
 	]
 
@@ -250,13 +222,13 @@ if __name__ == '__main__':
 	results = []
 
 	# Eval non-BERT models
-	data_dir = os.path.join('..', 'data', 'heterozygosity', 'samples_prepost_2')
+	data_dir = os.path.join('..', 'data', 'mecp2_binding', 'samples_pp')
 	split_file = 'split_1.json'
 
 	data_mod = STRHetPrePostDataModule(
 		data_dir, 
 		split_file, 
-		batch_size=128,
+		batch_size=32,
 		num_workers=3
 	)
 	data_mod.setup()
@@ -266,7 +238,7 @@ if __name__ == '__main__':
 			m['load_path'],
 			model=m['model']
 		)
-		trainer = pl.Trainer(gpus=1)
+		trainer = pl.Trainer(gpus=gpus)
 
 		preds = trainer.predict(
 			model=model, 
@@ -288,7 +260,7 @@ if __name__ == '__main__':
 		res_dict['ROC_auc'] = auc(res_dict['ROC_fpr'], res_dict['ROC_tpr'])
 
 		res_dict['PR_prec'], res_dict['PR_recall'], _ = precision_recall_curve(
-			y_true.int().numpy(), y_pred.numpy()
+			y_true.int().numpy(), y_pred.numpy(), pos_label=0
 		)
 		res_dict['PR_auc'] = auc(res_dict['PR_recall'], res_dict['PR_prec'])
 		
@@ -318,7 +290,7 @@ if __name__ == '__main__':
 			model=m['model'],
 			bert=True
 		)
-		trainer = pl.Trainer(gpus=1)
+		trainer = pl.Trainer(gpus=gpus)
 
 		preds = trainer.predict(
 			model=model, 
@@ -360,7 +332,7 @@ if __name__ == '__main__':
 		ax_pr.plot(res['PR_recall'], res['PR_prec'], label=res['name'], lw=lw,
 					linestyle='--')
 
-	fig.suptitle("Binary Heterozygosity Prediction")
+	fig.suptitle("Binary MeCP2 Binding Prediction (pos class is unbound for PR curve)")
 	ax_roc.set_title("ROC")
 	ax_roc.set_xlabel("False Positive Rate")
 	ax_roc.set_ylabel("True Positive Rate")
@@ -368,10 +340,10 @@ if __name__ == '__main__':
 	ax_pr.set_title("PR Curve")
 	ax_pr.set_xlabel("Recall")
 	ax_pr.set_ylabel("Precision")
-	ax_pr.legend(loc='lower left')
+	ax_pr.legend(loc='lower right')
 	fig.tight_layout()
 
-	fig.savefig('../trained_models/heterozygosity_bin_prepost/roc_pr.png',
+	fig.savefig('../trained_models/mecp2_pp/roc_pr.png',
 				bbox_inches='tight')
 	plt.close(fig)
 
@@ -393,7 +365,7 @@ if __name__ == '__main__':
 	axs[0].set_ylabel("True")
 	axs[0].set_xlabel("Pred")
 	# fig.tight_layout()
-	fig.savefig('../trained_models/heterozygosity_bin_prepost/CMs.png',
+	fig.savefig('../trained_models/mecp2_pp/CMs.png',
 				bbox_inches='tight')
 	plt.close(fig)
 
@@ -408,6 +380,6 @@ if __name__ == '__main__':
 	table['class_recall_0'] = [s[0].item() for s in table.class_recall]
 	table['class_recall_1'] = [s[1].item() for s in table.class_recall]
 	table = table.drop(columns=['class_precision', 'class_recall'])
-	table.to_csv('../trained_models/heterozygosity_bin_prepost/table.csv')
+	table.to_csv('../trained_models/mecp2_pp/table.csv')
 
 	print(table)

@@ -11,31 +11,34 @@ from data_modules import STRHetPrePostDataModule
 from models import STRPrePostClassifier, PrePostModel, InceptionPrePostModel
 from models import STRPrePostRegressor
 
+import cnn_models
+import enformer_models
+
 
 if __name__ == '__main__':
 	# options
-	regression = True
+	regression = False
 
 	from_checkpoint = False
-	checkpoint_path = 'heterozygosity_logs/resnet_1/version_4/checkpoints/epoch=27-last.ckpt'
+	checkpoint_path = 'mecp2_logs/round1/version_3/checkpoints/epoch=39-last.ckpt'
 
 	# Load
 	data_dir = os.path.join('..', 'data', 'mecp2_binding', 'samples_pp')
 	split_file = 'split_1.json'
 
 	task_log_dir = 'mecp2_logs'
-	model_log_dir = 'incep_4_2_pp'
+	model_log_dir = 'round1'
 
 	data = STRHetPrePostDataModule(
 		data_dir, 
 		split_file, 
-		batch_size=64,
+		batch_size=32,
 		num_workers=3,
 		is_binary=(not regression),
 	)
 
 	# incep_2
-	net = InceptionPrePostModel()
+	# net = InceptionPrePostModel(dropout=.4)
 	# net = InceptionPrePostModel(
 	# 	depth_fe=6,
 	# 	n_filters_fe=64,
@@ -44,6 +47,19 @@ if __name__ == '__main__':
 	# 	kernel_sizes=[3,7,15,39],
 	# 	activation='gelu'
 	# )
+	net = PrePostModel(
+		feature_extractor=cnn_models.InceptionBlock(
+			in_channels=5, 
+			depth=4,
+			activation='gelu'
+		),
+		predictor=enformer_models.EncoderPredictor(
+			d_model=128,
+			num_layers=2,
+			dim_ff=1500,
+			n_head=4,
+		)
+	)
 	if regression:
 		model = STRPrePostRegressor(
 			net, 
@@ -54,13 +70,14 @@ if __name__ == '__main__':
 	else:
 		model = STRPrePostClassifier(
 			net, 
-			learning_rate=1e-3, 
+			learning_rate=1e-4,#1e-3, 
 			reduce_lr_on_plateau=True,
-			patience=7
+			patience=15,
+			pos_weight=.2
 		)
 
 	callbacks = [
-		pl.callbacks.EarlyStopping('val_loss', verbose=True, patience=25),
+		pl.callbacks.EarlyStopping('val_loss', verbose=True, patience=50),#25),
 		pl.callbacks.ModelCheckpoint(
 			monitor="val_loss",
 			filename='{epoch}-best_val_loss'
@@ -89,10 +106,10 @@ if __name__ == '__main__':
 			logger=tb_logger,
 			gpus=1, 
 			log_every_n_steps=1, 
-			max_epochs=3, 
-			limit_train_batches=200,
-			limit_val_batches=200,
-			limit_test_batches=200,
+			# max_epochs=3, 
+			# limit_train_batches=200,
+			# limit_val_batches=200,
+			# limit_test_batches=200,
 			# auto_lr_find=True
 		)
 

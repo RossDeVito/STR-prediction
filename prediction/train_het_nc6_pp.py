@@ -13,49 +13,53 @@ from models import STRPrePostRegressor
 
 import cnn_models
 import enformer_models
+import model_utils
 
 
 if __name__ == '__main__':
 	# options
 	regression = False
 
-	from_checkpoint = False
-	checkpoint_path = 'heterozygosity_logs/resnet_1/version_4/checkpoints/epoch=27-last.ckpt'
+	from_checkpoint = True
+	checkpoint_path = 'heterozygosity_logs/full/version_0/checkpoints/epoch=22-last.ckpt'
 
 	# Load
 	data_dir = os.path.join('..', 'data', 'heterozygosity', 'samples_prepost_2')
-	split_file = 'split_1_nc6.json'
+	split_file = 'split_1.json'
 
 	task_log_dir = 'heterozygosity_logs'
-	model_log_dir = 'enf_v1_pp_nc6'
+	model_log_dir = 'full'
 
 	data = STRHetPrePostDataModule(
 		data_dir, 
 		split_file, 
-		batch_size=64,
+		batch_size=32,
 		num_workers=3,
 		is_binary=(not regression),
 	)
 
 	# incep_2
-	# net = InceptionPrePostModel()
+	# net = InceptionPrePostModel(dropout=.4)
 	# net = InceptionPrePostModel(
 	# 	depth_fe=6,
 	# 	n_filters_fe=64,
 	# 	depth_pred=3,
 	# 	n_filters_pred=64,
 	# 	kernel_sizes=[3,7,15,39],
-	# 	activation='gelu'
+	# 	activation='gelu',
+	# 	dropout=.4
 	# )
 	net = PrePostModel(
 		feature_extractor=cnn_models.InceptionBlock(
 				in_channels=5, 
-				depth=6,
+				depth=4,
 				activation='gelu'
 			),
 		predictor=enformer_models.EncoderPredictor(
 			d_model=128,
-			num_layers=3
+			num_layers=2,
+			dim_ff=1500,
+			n_head=4,
 		)
 	)
 	if regression:
@@ -68,13 +72,16 @@ if __name__ == '__main__':
 	else:
 		model = STRPrePostClassifier(
 			net, 
-			learning_rate=1e-3, 
+			learning_rate=1e-4, 
 			reduce_lr_on_plateau=True,
-			patience=7
+			patience=15,
+			# pos_weight=2.5#1.5#2.0
 		)
 
+	print(model_utils.count_params(model))
+
 	callbacks = [
-		pl.callbacks.EarlyStopping('val_loss', verbose=True, patience=25),
+		pl.callbacks.EarlyStopping('val_loss', verbose=True, patience=50),#25),
 		pl.callbacks.ModelCheckpoint(
 			monitor="val_loss",
 			filename='{epoch}-best_val_loss'
