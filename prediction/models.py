@@ -107,7 +107,7 @@ class STRPrePostClassifier(pl.LightningModule):
 		self.test_metrics = metrics.clone(prefix='test_')
 
 	def forward(self, x_pre, x_post):
-		return F.sigmoid(self.model(x_pre, x_post))
+		return torch.sigmoid(self.model(x_pre, x_post))
 
 	def shared_step(self, batch):
 		if self.bert:
