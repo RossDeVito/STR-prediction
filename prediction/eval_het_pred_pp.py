@@ -47,6 +47,30 @@ if __name__ == '__main__':
 			'model': InceptionPrePostModel(),
 			'load_path': '../trained_models/heterozygosity_bin_prepost/incep_v1_4_2_bs256/checkpoints/epoch=50-last.ckpt'
 		},
+		{   'name': 'Inception v1 (3,1), bs128',
+			'model': InceptionPrePostModel(
+				depth_fe=3,
+				n_filters_fe=32,
+				depth_pred=1,
+				n_filters_pred=32,
+				kernel_sizes=[9, 19, 39],
+				activation='gelu',
+				dropout=.4
+			),
+			'load_path': '../trained_models/heterozygosity_bin_prepost/version_4_nov29/checkpoints/epoch=34-best.ckpt'
+		},
+		{   'name': 'Inception v1 (3,1), bs128 last',
+			'model': InceptionPrePostModel(
+				depth_fe=3,
+				n_filters_fe=32,
+				depth_pred=1,
+				n_filters_pred=32,
+				kernel_sizes=[9, 19, 39],
+				activation='gelu',
+				dropout=.4
+			),
+			'load_path': '../trained_models/heterozygosity_bin_prepost/version_4_nov29/checkpoints/epoch=71-last.ckpt'
+		},
 		# {   'name': 'Inception v1 (6,3), bs64 f(3,7,15,39)',
 		# 	'model': InceptionPrePostModel(
 		# 		depth_fe=6,
@@ -169,38 +193,38 @@ if __name__ == '__main__':
         #     ),
 		# 	'load_path': '../trained_models/heterozygosity_bin_prepost/enf_v1_4_2_bs32/checkpoints/epoch=60-last.ckpt'
 		# },
-		{   'name': 'Enformer v1 (4,2), bs32',
-			'model': PrePostModel(
-                feature_extractor=cnn_models.InceptionBlock(
-                    in_channels=5, 
-                    depth=4,
-                    activation='gelu'
-                ),
-                predictor=enformer_models.EncoderPredictor(
-                    d_model=128,
-                    num_layers=2,
-                    dim_ff=1500,
-                    n_head=4,
-                )
-            ),
-			'load_path': '../trained_models/heterozygosity_bin_prepost/enf_v1_4_2_bs32_all/checkpoints/epoch=18-best_val_loss.ckpt'
-		},
-		{   'name': 'Enformer v1 (4,2), bs32 last',
-			'model': PrePostModel(
-                feature_extractor=cnn_models.InceptionBlock(
-                    in_channels=5, 
-                    depth=4,
-                    activation='gelu'
-                ),
-                predictor=enformer_models.EncoderPredictor(
-                    d_model=128,
-                    num_layers=2,
-                    dim_ff=1500,
-                    n_head=4,
-                )
-            ),
-			'load_path': '../trained_models/heterozygosity_bin_prepost/enf_v1_4_2_bs32_all/checkpoints/epoch=20-last.ckpt'
-		},
+		# {   'name': 'Enformer v1 (4,2), bs32',
+		# 	'model': PrePostModel(
+        #         feature_extractor=cnn_models.InceptionBlock(
+        #             in_channels=5, 
+        #             depth=4,
+        #             activation='gelu'
+        #         ),
+        #         predictor=enformer_models.EncoderPredictor(
+        #             d_model=128,
+        #             num_layers=2,
+        #             dim_ff=1500,
+        #             n_head=4,
+        #         )
+        #     ),
+		# 	'load_path': '../trained_models/heterozygosity_bin_prepost/enf_v1_4_2_bs32_all/checkpoints/epoch=18-best_val_loss.ckpt'
+		# },
+		# {   'name': 'Enformer v1 (4,2), bs32 last',
+		# 	'model': PrePostModel(
+        #         feature_extractor=cnn_models.InceptionBlock(
+        #             in_channels=5, 
+        #             depth=4,
+        #             activation='gelu'
+        #         ),
+        #         predictor=enformer_models.EncoderPredictor(
+        #             d_model=128,
+        #             num_layers=2,
+        #             dim_ff=1500,
+        #             n_head=4,
+        #         )
+        #     ),
+		# 	'load_path': '../trained_models/heterozygosity_bin_prepost/enf_v1_4_2_bs32_all/checkpoints/epoch=20-last.ckpt'
+		# },
 	]
 
 	bert_save_dir = 'dnabert/5-new-12w-0/'
