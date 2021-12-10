@@ -35,35 +35,35 @@ if __name__ == '__main__':
 		# 	'model': InceptionPrePostModel(),
 		# 	'load_path': '../trained_models/heterozygosity_bin_prepost/incep_v1_4_2_bs128/checkpoints/epoch=17-best_val_loss.ckpt'
 		# },
-		{   'name': 'Inception v1 (4,2), bs128 last',
-			'model': InceptionPrePostModel(),
-			'load_path': '../trained_models/heterozygosity_bin_prepost/incep_v1_4_2_bs128/checkpoints/epoch=42-last.ckpt'
-		},
-		{   'name': 'Inception v1 (4,2), bs256',
-			'model': InceptionPrePostModel(),
-			'load_path': '../trained_models/heterozygosity_bin_prepost/incep_v1_4_2_bs256/checkpoints/epoch=25-best_val_loss.ckpt'
-		},
+		# {   'name': 'Inception v1 (4,2), bs128 last',
+		# 	'model': InceptionPrePostModel(),
+		# 	'load_path': '../trained_models/heterozygosity_bin_prepost/incep_v1_4_2_bs128/checkpoints/epoch=42-last.ckpt'
+		# },
+		# {   'name': 'Inception v1 (4,2), bs256',
+		# 	'model': InceptionPrePostModel(),
+		# 	'load_path': '../trained_models/heterozygosity_bin_prepost/incep_v1_4_2_bs256/checkpoints/epoch=25-best_val_loss.ckpt'
+		# },
 		{   'name': 'Inception v1 (4,2), bs256 last',
 			'model': InceptionPrePostModel(),
 			'load_path': '../trained_models/heterozygosity_bin_prepost/incep_v1_4_2_bs256/checkpoints/epoch=50-last.ckpt'
 		},
 		{   'name': 'Inception v1 (3,1), bs128',
 			'model': InceptionPrePostModel(
-				depth_fe=3,
+				depth_fe=4,
 				n_filters_fe=32,
-				depth_pred=1,
+				depth_pred=2,
 				n_filters_pred=32,
 				kernel_sizes=[9, 19, 39],
 				activation='gelu',
 				dropout=.4
 			),
-			'load_path': '../trained_models/heterozygosity_bin_prepost/version_4_nov29/checkpoints/epoch=34-best.ckpt'
+			'load_path': '../trained_models/heterozygosity_bin_prepost/version_4_nov29/checkpoints/epoch=34-best_val_loss.ckpt'
 		},
 		{   'name': 'Inception v1 (3,1), bs128 last',
 			'model': InceptionPrePostModel(
-				depth_fe=3,
+				depth_fe=4,
 				n_filters_fe=32,
-				depth_pred=1,
+				depth_pred=2,
 				n_filters_pred=32,
 				kernel_sizes=[9, 19, 39],
 				activation='gelu',
