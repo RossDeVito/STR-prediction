@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import pytorch_lightning as pl
+from torch.nn.modules import flatten
 
 from torchmetrics import MetricCollection
 from torchmetrics import ConfusionMatrix, Precision, Recall, F1
@@ -162,3 +163,54 @@ class basic_CNN(nn.Module):
 		x = self.dropout3(self.relu3(self.conv3(x)))
 		x = torch.max(x, axis=2).values
 		return self.classifier(x)
+
+
+class DenseNet(nn.Module):
+	def __init__(self, input_size, layer_sizes, output_size, dropout=0.5):
+		super(DenseNet, self).__init__()
+		assert len(layer_sizes) > 0
+
+		layers = []
+
+		for i, n_hidden in enumerate(layer_sizes):
+			if i == 0:
+				layers.append(nn.Linear(input_size, n_hidden))
+			else:
+				layers.append(nn.Linear(layer_sizes[i-1], n_hidden))
+			layers.append(nn.ReLU())
+			layers.append(nn.Dropout(p=dropout))
+		
+		layers.append(nn.Linear(layer_sizes[-1], output_size))
+
+		self.layers = nn.Sequential(*layers)
+
+	def forward(self, x):
+		return self.layers(x)
+
+
+class FlattenDenseNet(nn.Module):
+	def __init__(self, input_len, input_num_channels, layer_sizes, 
+					output_size, dropout=0.5):
+		super().__init__()
+		self.flatten = nn.Flatten()
+		self.dense_net = DenseNet(
+			input_len * input_num_channels,
+			layer_sizes,
+			output_size,
+			dropout
+		)
+
+	def forward(self, x):
+		return self.dense_net(self.flatten(x))
+
+
+if __name__ == '__main__':
+	net1 = DenseNet(input_size=128*2*4, layers_sizes=[64, 64, 64], output_size=1)
+	X1 = torch.randn(8, 128*2*4)
+
+	net2 = FlattenDenseNet(128*2, 4, layers_sizes=[64, 64, 64], output_size=1)
+	X2 = torch.randn(8, 128*2, 4)
+
+	from model_utils import count_params
+	print(count_params(net1))
+	print(count_params(net2))

@@ -30,7 +30,7 @@ class STRDataset(Dataset):
 		split_name (str): name of split column to use
 		split_type (int): 0: 'train', 1: 'val', or 2: 'test' corresponding
 			to values in split_name column of data_file. If None, all
-		incl_STR_feat (bool): whether to include 5th row of feature matrix
+		incl_STR_feat (bool): whether to include 5/6th row of feature matrix
 			with binary label if position is part of the central STR
 		min_boundary_STR_pos (int): minimum number of STRs loci to include
 		max_boundary_STR_pos (int): maximum number of STRs loci to include
@@ -38,7 +38,7 @@ class STRDataset(Dataset):
 		min_copy_num (int): minimum copy number to include STR in Dataset
 		max_copy_num (int): maximum copy number to include STR in Dataset
 		bp_dist_units (float): distance feature will be in units of 
-			(# of bp) / bp_dist_base
+			(# of bp) / bp_dist_base. If None, then no distance feature
 		as_tensors (bool): whether to return tensors instead of numpy arrays
 			for feature matrices
 		return_data (bool): whether to return the data object from the
@@ -50,7 +50,7 @@ class STRDataset(Dataset):
 			incl_STR_feat=True, min_boundary_STR_pos=2, max_boundary_STR_pos=2,
 			window_size=128, min_copy_num=None, max_copy_num=None,
 			bp_dist_units=1000.0, as_tensors=True, 
-			return_data=False, return_strings=False):
+			return_data=False, return_strings=False, incl_dist_feat=True):
 		"""Inits STRDataset with data_file and desired split or all 
 		data (default).
 		"""
@@ -93,10 +93,7 @@ class STRDataset(Dataset):
 		"""Returns number of feature channels in matrix returned by 
 		__getitem__.
 		"""
-		if self.incl_STR_feat:
-			return 6
-		else:
-			return 5
+		return 4 + int(self.incl_STR_feat) + int(self.bp_dist_units is not None)
 
 	def make_feature_matrix(self, seq_string, num_STR_loci, pre_STR):
 		"""Makes tensor of features for given seqence."""
@@ -108,16 +105,21 @@ class STRDataset(Dataset):
 		G = unk + (seq == 'G')
 		T = unk + (seq == 'T')
 
-		if pre_STR:
-			dists = np.array(
-				list(range(-len(seq_string) + num_STR_loci, num_STR_loci, 1))
-			) / self.bp_dist_units
-			dists[-num_STR_loci:] = 0
-		else:
-			dists = np.array(
-				list(range(-num_STR_loci+1, len(seq_string) - num_STR_loci + 1, 1))
-			) / self.bp_dist_units
-			dists[:num_STR_loci] = 0
+		# combine into feature matrix
+		feat_list = [A, C, G, T]
+
+		if self.bp_dist_units is not None:
+			if pre_STR:
+				dists = np.array(
+					list(range(-len(seq_string) + num_STR_loci, num_STR_loci, 1))
+				) / self.bp_dist_units
+				dists[-num_STR_loci:] = 0
+			else:
+				dists = np.array(
+					list(range(-num_STR_loci+1, len(seq_string) - num_STR_loci + 1, 1))
+				) / self.bp_dist_units
+				dists[:num_STR_loci] = 0
+			feat_list.append(dists)
 
 		if self.incl_STR_feat:
 			if pre_STR:
@@ -126,9 +128,9 @@ class STRDataset(Dataset):
 			else:
 				is_STR = np.zeros(len(seq_string))
 				is_STR[:num_STR_loci] = 1
-			feat_mat = np.vstack((A, C, G, T, dists, is_STR))
-		else:
-			feat_mat = np.vstack((A, C, G, T, dists))
+			feat_list.append(is_STR)
+		
+		feat_mat = np.vstack(feat_list)
 
 		if self.as_tensors:
 			return torch.tensor(feat_mat)
@@ -313,10 +315,7 @@ class STRDataModule(pl.LightningDataModule):
 		"""Returns number of feature channels in matrix returned by 
 		__getitem__.
 		"""
-		if self.incl_STR_feat:
-			return 6
-		else:
-			return 5
+		return 4 + int(self.incl_STR_feat) + int(self.bp_dist_units is not None)
 
 
 if __name__ == '__main__':
@@ -327,7 +326,7 @@ if __name__ == '__main__':
 	data_path = os.path.join('..', 'data', 'heterozygosity', 
 								'sample_data_V2_repeat_var.json')
 
-	# ds_all = STRDataset(data_path)
+	ds_all_wind = STRDataset(data_path, min_copy_num=7.5, max_copy_num=8.5,)
 	# ds_0 = STRDataset(data_path, 'split_1', split_type=0)
 	ds_1 = STRDataset(data_path, 'split_1', split_type=0, max_copy_num=15)
 
@@ -335,6 +334,8 @@ if __name__ == '__main__':
 		min_boundary_STR_pos=4,
 		max_boundary_STR_pos=6,
 		max_copy_num=15,
+		bp_dist_units=None,
+		incl_STR_feat=False
 	)
 	data_mod.setup()
 	train_dataloader = data_mod.train_dataloader()
