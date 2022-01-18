@@ -12,7 +12,7 @@ from tqdm import tqdm
 if __name__ == '__main__':
 	# Load target STRs to be labeled
 	unlabeled_samp_dir = os.path.join('..', 'data', 'HipSTR-references')
-	unlabeled_samp_fname = 'unlabeled_samples_GRCh38_500_per_side.json'
+	unlabeled_samp_fname = 'unlabeled_samples_T_GRCh38_500_per_side.json'
 	unlabeled_samp_path = os.path.join(unlabeled_samp_dir, unlabeled_samp_fname)
 
 	with open(unlabeled_samp_path) as fp:    
@@ -77,7 +77,7 @@ if __name__ == '__main__':
 	print(len(new_samples))
 
 	# Save labeled samples to main data dict
-	this_sample_set_fname = 'labeled_samples_het.json'
+	this_sample_set_fname = 'labeled_samples_T_het.json'
 	samples_save_path = os.path.join(data_dir, this_sample_set_fname)
 
 	with open(samples_save_path, 'w') as fp:

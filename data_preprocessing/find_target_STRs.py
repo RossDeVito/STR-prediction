@@ -32,7 +32,7 @@ if __name__ == '__main__':
 	print("total STRs:\t{}".format(len(str_regions)))
 
 	# Filter down to relevant motifs
-	target_motifs = ['AC', 'CA', 'TG', 'GT']
+	target_motifs = ['T', 'A']
 	str_regions = str_regions[str_regions.motif.isin(target_motifs)]
 
 	print("found target regions:")
@@ -96,7 +96,7 @@ if __name__ == '__main__':
 		})
 
 	# Save unlabeled samples to main data dict
-	this_sample_set_fname = 'unlabeled_samples_GRCh38_{}_per_side.json'.format(n_per_side)
+	this_sample_set_fname = 'unlabeled_samples_T_GRCh38_{}_per_side.json'.format(n_per_side)
 	samples_save_path = os.path.join('..', 'data', 'HipSTR-references', 
 										this_sample_set_fname)
 

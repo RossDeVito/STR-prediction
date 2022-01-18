@@ -69,20 +69,20 @@ def make_stratified_splits(group_label, train_ratio, test_ratio, rand_seed=None)
 
 if __name__ == '__main__':
 	# Parameters
-	max_STR_len = 60
+	max_STR_len = 50
 	output_seq_len = 1000
 
 	min_num_called = 100 # if None will skip, for het task
 
 	# Motifs not in this list will be removed. Remember labeled_samples
 	#  already includes complements
-	motif_types = ['CA', 'AC']
+	motif_types = ['T']
 
 	remove_imperfect_repeats = True # Remove STRs that are not perfect repeats of motif
 
 	# Load labeled STRs to be preprocessed
 	samp_dir = os.path.join('..', 'data', 'heterozygosity')
-	samp_fname = 'labeled_samples_het.json'
+	samp_fname = 'labeled_samples_T_het.json'
 	samp_path = os.path.join(samp_dir, samp_fname)
 
 	with open(samp_path) as fp:    
@@ -141,7 +141,7 @@ if __name__ == '__main__':
 
 	# Save JSON of preprocessed samples
 	save_dir = os.path.join('..', 'data', 'heterozygosity',)
-	this_sample_set_fname = 'sample_data_V2_repeat_var.json'
+	this_sample_set_fname = 'sample_data_T_V2_repeat_var.json'
 	save_path = os.path.join(save_dir, this_sample_set_fname)
 
 	samp_df.to_json(save_path, orient='records', indent=4)
