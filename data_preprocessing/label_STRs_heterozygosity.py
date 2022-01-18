@@ -53,7 +53,11 @@ if __name__ == '__main__':
 	# Label each STR sample with heterozygosity
 	for samp in tqdm(samples):
 		chrom, pos = samp['str_seq_name'].split(':')
-		start, end = (int(val) for val in pos.split('-'))
+		if 'complement' in pos:
+			pos = pos.split(' ')[0]
+			end, start = (int(val) for val in pos.split('-'))
+		else:
+			start, end = (int(val) for val in pos.split('-'))
 
 		samp_leq_range_end = start <= chrom_dfs[chrom].end.values
 		samp_geq_range_start = end >= chrom_dfs[chrom].start.values

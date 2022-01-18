@@ -81,17 +81,17 @@ if __name__ == '__main__':
 		samples.append({
 			'HipSTR_name': region.str_name,
 			'complement': True,
-			'motif': str_seq.complement.seq[:region.motif_len],
+			'motif': str_seq.reverse.complement.seq[:region.motif_len],
 			'motif_len': region.motif_len,
 			'num_copies': region.num_copies,
-			'str_seq': str_seq.complement.seq,
-			'str_seq_name': str_seq.fancy_name,
-			'pre_seq': pre_seq.complement.seq,
-			'pre_seq_name': pre_seq.fancy_name,
-			'post_seq': post_seq.complement.seq,
-			'post_seq_name': post_seq.fancy_name,
-			'full_seq': full_seq.complement.seq,
-			'full_seq_name': full_seq.fancy_name,
+			'str_seq': str_seq.reverse.complement.seq,
+			'str_seq_name': str_seq.reverse.complement.fancy_name,
+			'pre_seq': post_seq.reverse.complement.seq,
+			'pre_seq_name': post_seq.reverse.complement.fancy_name,
+			'post_seq': pre_seq.reverse.complement.seq,
+			'post_seq_name': pre_seq.reverse.complement.fancy_name,
+			'full_seq': full_seq.reverse.complement.seq,
+			'full_seq_name': full_seq.reverse.complement.fancy_name,
 			'n_per_side': n_per_side
 		})
 
