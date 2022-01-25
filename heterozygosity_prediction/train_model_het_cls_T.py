@@ -17,8 +17,8 @@ if __name__ == '__main__':
 	training_params = {
 		# Data Module
 		'batch_size': 256,
-		'min_copy_number': None,
-		'max_copy_number': 15,
+		'min_copy_number': 11.0,
+		'max_copy_number': 11.5,
 		'incl_STR_feat': True,
 		'min_boundary_STR_pos': 6,
 		'max_boundary_STR_pos': 6,
@@ -31,24 +31,24 @@ if __name__ == '__main__':
 		'reduce_lr_on_plateau': True,
 		'reduce_lr_factor': 0.5,
 		'lr_reduce_patience': 20,
-		'pos_weight': None,
+		'pos_weight': .7,
 
 		# Callbacks
 		'early_stopping_patience': 50,
 
 		# Model params
-		'depth_fe': 5,
+		'depth_fe': 3,
 		'n_filters_fe': 32,
-		'depth_pred': 2,
+		'depth_pred': 1,
 		'n_filters_pred': 32,
-		'kernel_sizes': [3, 5, 7, 9, 13, 21],
+		'kernel_sizes': [3, 5, 7, 9, 13],
 		'activation': 'gelu',
-		'dropout': 0.25
+		'dropout': 0.2
 	}
 	num_workers_per_loader = 3
 
 	task_log_dir = 'het_cls_logs'
-	model_log_dir = 'V2_1'
+	model_log_dir = 'V2_1_T'
 	num_gpus = 1
 
 	# resuming from checkpoint
@@ -57,7 +57,7 @@ if __name__ == '__main__':
 
 	# Load with DataModule
 	data_path = os.path.join(
-		'..', 'data', 'heterozygosity', 'sample_data_V2_repeat_var.json'
+		'..', 'data', 'heterozygosity', 'sample_data_T_V2_repeat_var.json'
 	)
 	data_module = STRDataModule(
 		data_path,
@@ -74,16 +74,6 @@ if __name__ == '__main__':
 	)
 
 	# Create model
-	# net = prepost_models.InceptionPrePostModel(
-	# 	in_channels=data_module.num_feat_channels(),
-	# 	depth_fe=3,
-	# 	n_filters_fe=32,
-	# 	depth_pred=1,
-	# 	n_filters_pred=32,
-	# 	kernel_sizes=[3, 5, 9, 19],
-	# 	activation='gelu',
-	# 	dropout=.2
-	# )
 	net = prepost_models.InceptionPrePostModel(
 		in_channels=data_module.num_feat_channels(),
 		depth_fe=training_params['depth_fe'],
@@ -94,17 +84,6 @@ if __name__ == '__main__':
 		activation=training_params['activation'],
 		dropout=training_params['dropout']
 	)
-	# # for 7.5 to 8.5
-	# net = prepost_models.InceptionPrePostModel(
-	# 	in_channels=data_module.num_feat_channels(),
-	# 	depth_fe=3,
-	# 	n_filters_fe=32,
-	# 	depth_pred=1,
-	# 	n_filters_pred=32,
-	# 	kernel_sizes=[3, 5, 9, 19],
-	# 	activation='gelu',
-	# 	dropout=.4
-	# )
 	model = models.STRPrePostClassifier(
 		net,
 		learning_rate=training_params['lr'],

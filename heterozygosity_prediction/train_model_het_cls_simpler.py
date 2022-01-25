@@ -18,7 +18,7 @@ if __name__ == '__main__':
 	# options
 	training_params = {
 		# Data Module
-		'batch_size': 512,
+		'batch_size': 256,
 		'min_copy_number': None,
 		'max_copy_number': 15,
 		'incl_STR_feat': False,
@@ -39,14 +39,14 @@ if __name__ == '__main__':
 		'early_stopping_patience': 50,
 
 		# Network
-		'layer_sizes': [64, 64, 64],
-		'dropout': 0.4,
+		'layer_sizes': [64, 32, 16],
+		'dropout': 0.3,
 	}
 	num_workers_per_loader = 3
 
 	task_log_dir = 'het_cls_logs'
-	model_log_dir = 'V2_0_simple'
-	num_gpus = 0
+	model_log_dir = 'V2_1_simple'
+	num_gpus = 1
 
 	# resuming from checkpoint
 	from_checkpoint = False
@@ -91,7 +91,8 @@ if __name__ == '__main__':
 		patience=training_params['lr_reduce_patience'],
 		pos_weight=training_params['pos_weight']
 	)
-	print(count_params(model))
+	training_params['model_n_params'] = count_params(model)
+	print(training_params['model_n_params'])
 
 	# Setup training
 	callbacks = [
