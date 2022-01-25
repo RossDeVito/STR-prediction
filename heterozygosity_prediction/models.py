@@ -165,29 +165,6 @@ class basic_CNN(nn.Module):
 		return self.classifier(x)
 
 
-class DenseNet(nn.Module):
-	def __init__(self, input_size, layer_sizes, output_size, dropout=0.5):
-		super(DenseNet, self).__init__()
-		assert len(layer_sizes) > 0
-
-		layers = []
-
-		for i, n_hidden in enumerate(layer_sizes):
-			if i == 0:
-				layers.append(nn.Linear(input_size, n_hidden))
-			else:
-				layers.append(nn.Linear(layer_sizes[i-1], n_hidden))
-			layers.append(nn.ReLU())
-			layers.append(nn.Dropout(p=dropout))
-		
-		layers.append(nn.Linear(layer_sizes[-1], output_size))
-
-		self.layers = nn.Sequential(*layers)
-
-	def forward(self, x):
-		return self.layers(x)
-
-
 class FlattenDenseNet(nn.Module):
 	def __init__(self, input_len, input_num_channels, layer_sizes, 
 					output_size, dropout=0.5):

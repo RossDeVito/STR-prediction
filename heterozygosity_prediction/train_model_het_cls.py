@@ -1,5 +1,6 @@
 import os
 import json
+import platform
 
 import pytorch_lightning as pl
 
@@ -37,19 +38,31 @@ if __name__ == '__main__':
 		'early_stopping_patience': 50,
 
 		# Model params
+		'model_type': 'InceptionPreDimRedPost',#'InceptionPrePostModel',
 		'depth_fe': 5,
 		'n_filters_fe': 32,
 		'depth_pred': 2,
 		'n_filters_pred': 32,
-		'kernel_sizes': [3, 5, 7, 9, 13, 21],
+		'kernel_sizes': [5, 7, 11],
 		'activation': 'gelu',
-		'dropout': 0.25
+		'dropout': 0.25,
+
+		# for InceptionPreDimRedPost
+		'reduce_to': 16,
+		'pool_size': 2,
+		'kernel_sizes_pred': [5, 7, 9],
+		'dropout_dense': 0.2,
+		'dense_layer_sizes': [128],
 	}
 	num_workers_per_loader = 3
 
 	task_log_dir = 'het_cls_logs'
-	model_log_dir = 'V2_1'
-	num_gpus = 1
+	model_log_dir = 'V2_1_T_testing'
+	if platform.system() == 'Darwin':
+		num_gpus = 0
+		print("Running on MacOS, setting num_gpus to 0")
+	else:
+		num_gpus = 1
 
 	# resuming from checkpoint
 	from_checkpoint = False
@@ -74,37 +87,33 @@ if __name__ == '__main__':
 	)
 
 	# Create model
-	# net = prepost_models.InceptionPrePostModel(
-	# 	in_channels=data_module.num_feat_channels(),
-	# 	depth_fe=3,
-	# 	n_filters_fe=32,
-	# 	depth_pred=1,
-	# 	n_filters_pred=32,
-	# 	kernel_sizes=[3, 5, 9, 19],
-	# 	activation='gelu',
-	# 	dropout=.2
-	# )
-	net = prepost_models.InceptionPrePostModel(
-		in_channels=data_module.num_feat_channels(),
-		depth_fe=training_params['depth_fe'],
-		n_filters_fe=training_params['n_filters_fe'],
-		depth_pred=training_params['depth_pred'],
-		n_filters_pred=training_params['n_filters_pred'],
-		kernel_sizes=training_params['kernel_sizes'],
-		activation=training_params['activation'],
-		dropout=training_params['dropout']
-	)
-	# # for 7.5 to 8.5
-	# net = prepost_models.InceptionPrePostModel(
-	# 	in_channels=data_module.num_feat_channels(),
-	# 	depth_fe=3,
-	# 	n_filters_fe=32,
-	# 	depth_pred=1,
-	# 	n_filters_pred=32,
-	# 	kernel_sizes=[3, 5, 9, 19],
-	# 	activation='gelu',
-	# 	dropout=.4
-	# )
+	if training_params['model_type'] == 'InceptionPrePostModel':
+		net = prepost_models.InceptionPrePostModel(
+			in_channels=data_module.num_feat_channels(),
+			depth_fe=training_params['depth_fe'],
+			n_filters_fe=training_params['n_filters_fe'],
+			depth_pred=training_params['depth_pred'],
+			n_filters_pred=training_params['n_filters_pred'],
+			kernel_sizes=training_params['kernel_sizes'],
+			activation=training_params['activation'],
+			dropout=training_params['dropout']
+		)
+	elif training_params['model_type'] == 'InceptionPreDimRedPost':
+		net = prepost_models.InceptionPreDimRedPost(
+			n_per_side=training_params['window_size'],
+			reduce_to=training_params['reduce_to'],
+			in_channels=data_module.num_feat_channels(),
+			depth_fe=training_params['depth_fe'],
+			pool_size=training_params['pool_size'],
+			n_filters_fe=training_params['n_filters_fe'],
+			kernel_sizes_fe=training_params['kernel_sizes'],
+			kernel_sizes_pred=training_params['kernel_sizes_pred'],
+			n_filters_pred=training_params['n_filters_pred'],
+			activation=training_params['activation'],
+			dropout_cnn=training_params['dropout'],
+			dropout_dense=training_params['dropout_dense'],
+			dense_layer_sizes=training_params['dense_layer_sizes']
+		)
 	model = models.STRPrePostClassifier(
 		net,
 		learning_rate=training_params['lr'],

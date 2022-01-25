@@ -7,6 +7,7 @@ import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from einops.layers.torch import Rearrange
 
 from model_utils import *
 
@@ -438,15 +439,102 @@ class InceptionTime(nn.Module):
 		return x
 
 
+# Attention pooling from https://github.com/boxiangliu/enformer-pytorch
+class AttentionPool(nn.Module):
+    def __init__(self, dim, pool_size = 2):
+        super().__init__()
+        self.pool_size = pool_size
+        self.pool_fn = Rearrange('b d (n p) -> b d n p', p = 2)
+        self.to_attn_logits = nn.Parameter(torch.eye(dim))
+
+    def forward(self, x):
+        b, _, n = x.shape
+        remainder = n % self.pool_size
+        needs_padding = remainder > 0
+
+        if needs_padding:
+            x = F.pad(x, (0, remainder), value = 0)
+            mask = torch.zeros((b, 1, n), dtype = torch.bool, device = x.device)
+            mask = F.pad(mask, (0, remainder), value = True)
+
+        attn_logits = torch.einsum('b d n, d e -> b e n', x, self.to_attn_logits)
+        x = self.pool_fn(x)
+        logits = self.pool_fn(attn_logits)
+
+        if needs_padding:
+            mask_value = -torch.finfo(logits.dtype).max
+            logits = logits.masked_fill(self.pool_fn(mask), mask_value)
+
+        attn = logits.softmax(dim = -1)
+        return (x * attn).sum(dim = -1)
+
+
+class DimReducingInception(nn.Module):
+	"""Use to reduce 'length' of sequence embedding via attention pooling."""
+	def __init__(self, in_channels, in_seq_len, out_seq_len,
+					kernel_sizes=[9, 19, 39], n_filters=32, pool_size=2,
+					**kwargs):
+		super().__init__()
+		self.in_channels = in_channels
+		self.in_seq_len = in_seq_len
+		self.out_seq_len = out_seq_len
+		self.kernel_sizes = kernel_sizes
+		self.n_filters = n_filters
+		self.pool_size = pool_size
+
+		self.output_len = None
+		
+		# Create network
+		cur_seq_len = self.in_seq_len
+		cur_in_channels = in_channels
+		layers = []
+
+		while cur_seq_len > self.out_seq_len:
+			if cur_seq_len < max(kernel_sizes):
+				raise ValueError('Sequence length must not be less than max kernel size.')
+			layers.append(AttentionPool(cur_in_channels, self.pool_size))
+			layers.append(InceptionBlock(
+				in_channels=cur_in_channels,
+				depth=1,
+				kernel_sizes=self.kernel_sizes,
+				n_filters=self.n_filters,
+				**kwargs
+			))
+			cur_seq_len = math.ceil(cur_seq_len / self.pool_size)
+			cur_in_channels = (len(self.kernel_sizes) + 1) * self.n_filters
+			self.output_len = cur_seq_len
+
+		self.layers = nn.Sequential(*layers)
+
+	def forward(self, x):
+		return self.layers(x)
+
 if __name__ == '__main__':
-	x = torch.randn(4, 7, 1000)
-	incep = InceptionModule(7, n_filters=32, kernel_sizes=[7, 39, 19, 61])
-	r_m = incep(x)
+	# x = torch.randn(4, 7, 1000)
+	# incep = InceptionModule(7, n_filters=32, kernel_sizes=[7, 39, 19, 61])
+	# r_m = incep(x)
 
-	incep_block = InceptionBlock(7, depth=6, n_filters=32)
-	r_b = incep_block(x)
+	# incep_block = InceptionBlock(7, depth=6, n_filters=32)
+	# r_b = incep_block(x)
 
-	model = InceptionTime(in_channels=7, output_dim=1, kernel_sizes=[7, 19, 39])
-	r = model(x)
+	# model = InceptionTime(in_channels=7, output_dim=1, kernel_sizes=[7, 19, 39])
+	# r = model(x)
 
-	m2 = InceptionTime(in_channels=7, output_dim=1, kernel_sizes=[7, 19, 39, 51], n_filters=32)
+	# m2 = InceptionTime(in_channels=7, output_dim=1, kernel_sizes=[7, 19, 39, 51], n_filters=32)
+
+	# Test attention pooling
+	x = torch.randn(2, 3, 8)
+	attn_pool = AttentionPool(3)
+	r = attn_pool(x)
+
+	# x = torch.randn(2, 3, 8)
+	# pool_fn = Rearrange('b n (d p) -> b d n p', p = 2)
+	# p = pool_fn(x)
+	# to_attn_logits = nn.Parameter(torch.eye(8))
+
+	x = torch.randn(4, 200, 128)
+	net = DimReducingInception(
+		in_channels=200, in_seq_len=128, out_seq_len=16, 
+		kernel_sizes=[7, 11, 15], n_filters=32
+	)
+	x_ = net(x)

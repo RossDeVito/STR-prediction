@@ -24,136 +24,259 @@ if __name__ == '__main__':
 	num_feat_channels = 6
 	num_gpu = 0
 
+	# models_to_eval = [
+	# 	{   'name': 'Inception v1 (3,1), bs512',
+	# 		'model': InceptionPrePostModel(
+	# 			in_channels=num_feat_channels,
+	# 			depth_fe=3,
+	# 			n_filters_fe=32,
+	# 			depth_pred=1,
+	# 			n_filters_pred=32,
+	# 			kernel_sizes=[3, 5, 9, 19],
+	# 			activation='gelu',
+	# 			dropout=.2
+	# 		),
+	# 		'load_path': '../trained_models/het_cls_v2/round1/version_0_bs512/checkpoints/epoch=33-best_val_loss.ckpt'
+	# 	},
+	# 	# {   'name': 'Inception v1 (3,1), bs512 last',
+	# 	# 	'model': InceptionPrePostModel(
+	# 	# 		in_channels=num_feat_channels,
+	# 	# 		depth_fe=3,
+	# 	# 		n_filters_fe=32,
+	# 	# 		depth_pred=1,
+	# 	# 		n_filters_pred=32,
+	# 	# 		kernel_sizes=[3, 5, 9, 19],
+	# 	# 		activation='gelu',
+	# 	# 		dropout=.2
+	# 	# 	),
+	# 	# 	'load_path': '../trained_models/het_cls_v2/round1/version_0_bs512/checkpoints/epoch=83-last.ckpt'
+	# 	# },
+	# 	{   'name': 'Inception v1 (3,1), bs256',
+	# 		'model': InceptionPrePostModel(
+	# 			in_channels=num_feat_channels,
+	# 			depth_fe=3,
+	# 			n_filters_fe=32,
+	# 			depth_pred=1,
+	# 			n_filters_pred=32,
+	# 			kernel_sizes=[3, 5, 9, 19],
+	# 			activation='gelu',
+	# 			dropout=.2
+	# 		),
+	# 		'load_path': '../trained_models/het_cls_v2/round1/version_1/checkpoints/epoch=25-best_val_loss.ckpt'
+	# 	},
+	# 	# {   'name': 'Inception v1 (3,1), bs256 last',
+	# 	# 	'model': InceptionPrePostModel(
+	# 	# 		in_channels=num_feat_channels,
+	# 	# 		depth_fe=3,
+	# 	# 		n_filters_fe=32,
+	# 	# 		depth_pred=1,
+	# 	# 		n_filters_pred=32,
+	# 	# 		kernel_sizes=[3, 5, 9, 19],
+	# 	# 		activation='gelu',
+	# 	# 		dropout=.2
+	# 	# 	),
+	# 	# 	'load_path': '../trained_models/het_cls_v2/round1/version_1/checkpoints/epoch=75-last.ckpt'
+	# 	# },
+	# 	{   'name': 'Inception v1 (6,3), bs256',
+	# 		'model': InceptionPrePostModel(
+	# 			in_channels=num_feat_channels,
+	# 			depth_fe=6,
+	# 			n_filters_fe=32,
+	# 			depth_pred=3,
+	# 			n_filters_pred=32,
+	# 			kernel_sizes=[3, 5, 9, 19],
+	# 			activation='gelu',
+	# 			dropout=.2
+	# 		),
+	# 		'load_path': '../trained_models/het_cls_v2/round1/version_2/checkpoints/epoch=29-best_val_loss.ckpt'
+	# 	},
+	# 	# {   'name': 'Inception v1 (6,3), bs256 last',
+	# 	# 	'model': InceptionPrePostModel(
+	# 	# 		in_channels=num_feat_channels,
+	# 	# 		depth_fe=6,
+	# 	# 		n_filters_fe=32,
+	# 	# 		depth_pred=3,
+	# 	# 		n_filters_pred=32,
+	# 	# 		kernel_sizes=[3, 5, 9, 19],
+	# 	# 		activation='gelu',
+	# 	# 		dropout=.2
+	# 	# 	),
+	# 	# 	'load_path': '../trained_models/het_cls_v2/round1/version_2/checkpoints/epoch=79-last.ckpt'
+	# 	# },
+	# 	{   'name': 'Inception v1 (6,3), bs256',
+	# 		'model': InceptionPrePostModel(
+	# 			in_channels=num_feat_channels,
+	# 			depth_fe=6,
+	# 			n_filters_fe=32,
+	# 			depth_pred=3,
+	# 			n_filters_pred=32,
+	# 			kernel_sizes=[3, 5, 9, 19],
+	# 			activation='gelu',
+	# 			dropout=.2
+	# 		),
+	# 		'load_path': '../trained_models/het_cls_v2/round1/version_2/checkpoints/epoch=29-best_val_loss.ckpt'
+	# 	},
+	# 	# {   'name': 'Inception v1 (6,3), bs256 last',
+	# 	# 	'model': InceptionPrePostModel(
+	# 	# 		in_channels=num_feat_channels,
+	# 	# 		depth_fe=6,
+	# 	# 		n_filters_fe=32,
+	# 	# 		depth_pred=3,
+	# 	# 		n_filters_pred=32,
+	# 	# 		kernel_sizes=[3, 5, 9, 19],
+	# 	# 		activation='gelu',
+	# 	# 		dropout=.2
+	# 	# 	),
+	# 	# 	'load_path': '../trained_models/het_cls_v2/round1/version_2/checkpoints/epoch=79-last.ckpt'
+	# 	# },
+	# 	{   'name': 'Inception v1 (6,3), bs256 do.3',
+	# 		'model': InceptionPrePostModel(
+	# 			in_channels=num_feat_channels,
+	# 			depth_fe=6,
+	# 			n_filters_fe=32,
+	# 			depth_pred=3,
+	# 			n_filters_pred=32,
+	# 			kernel_sizes=[3, 5, 9, 19],
+	# 			activation='gelu',
+	# 			dropout=.3
+	# 		),
+	# 		'load_path': '../trained_models/het_cls_v2/round1/version_5/checkpoints/epoch=80-best_val_loss.ckpt'
+	# 	},
+	# 	{   'name': 'Inception v1 (6,3), bs256 do.3 last',
+	# 		'model': InceptionPrePostModel(
+	# 			in_channels=num_feat_channels,
+	# 			depth_fe=6,
+	# 			n_filters_fe=32,
+	# 			depth_pred=3,
+	# 			n_filters_pred=32,
+	# 			kernel_sizes=[3, 5, 9, 19],
+	# 			activation='gelu',
+	# 			dropout=.3
+	# 		),
+	# 		'load_path': '../trained_models/het_cls_v2/round1/version_5/checkpoints/epoch=124-last.ckpt'
+	# 	},
+	# ]
+	## Round2
+	# models_to_eval = [
+	# 	{   'name': 'Inception v1 (3,1), bs256',
+	# 		'model': InceptionPrePostModel(
+	# 			in_channels=num_feat_channels,
+	# 			depth_fe=3,
+	# 			n_filters_fe=32,
+	# 			depth_pred=1,
+	# 			n_filters_pred=32,
+	# 			kernel_sizes=[5, 9, 19],
+	# 			activation='gelu',
+	# 			dropout=.3
+	# 		),
+	# 		'load_path': '../trained_models/het_cls_v2/round2/version_0/checkpoints/epoch=47-best_val_loss.ckpt'
+	# 	},
+	# 	{   'name': 'Inception v1 (3,1), bs256 last',
+	# 		'model': InceptionPrePostModel(
+	# 			in_channels=num_feat_channels,
+	# 			depth_fe=3,
+	# 			n_filters_fe=32,
+	# 			depth_pred=1,
+	# 			n_filters_pred=32,
+	# 			kernel_sizes=[5, 9, 19],
+	# 			activation='gelu',
+	# 			dropout=.3
+	# 		),
+	# 		'load_path': '../trained_models/het_cls_v2/round2/version_0/checkpoints/epoch=97-last.ckpt'
+	# 	},
+	# 	{   'name': 'Inception v1 (5,2), bs256',
+	# 		'model': InceptionPrePostModel(
+	# 			in_channels=num_feat_channels,
+	# 			depth_fe=5,
+	# 			n_filters_fe=64,
+	# 			depth_pred=2,
+	# 			n_filters_pred=64,
+	# 			kernel_sizes=[5, 9, 19],
+	# 			activation='gelu',
+	# 			dropout=.3
+	# 		),
+	# 		'load_path': '../trained_models/het_cls_v2/round2/version_1/checkpoints/epoch=65-best_val_loss.ckpt'
+	# 	},
+	# 	{   'name': 'Inception v1 (5,2), bs256 last',
+	# 		'model': InceptionPrePostModel(
+	# 			in_channels=num_feat_channels,
+	# 			depth_fe=5,
+	# 			n_filters_fe=64,
+	# 			depth_pred=2,
+	# 			n_filters_pred=64,
+	# 			kernel_sizes=[5, 9, 19],
+	# 			activation='gelu',
+	# 			dropout=.3
+	# 		),
+	# 		'load_path': '../trained_models/het_cls_v2/round2/version_1/checkpoints/epoch=115-last.ckpt'
+	# 	},
+	# ]
+	## Round3
 	models_to_eval = [
-		{   'name': 'Inception v1 (3,1), bs512',
+		{   'name': 'Inception 0 ((3,32),(1,32)) [5,9,19]',
 			'model': InceptionPrePostModel(
 				in_channels=num_feat_channels,
 				depth_fe=3,
 				n_filters_fe=32,
 				depth_pred=1,
 				n_filters_pred=32,
-				kernel_sizes=[3, 5, 9, 19],
-				activation='gelu',
-				dropout=.2
-			),
-			'load_path': '../trained_models/het_cls_v2/round1/version_0_bs512/checkpoints/epoch=33-best_val_loss.ckpt'
-		},
-		# {   'name': 'Inception v1 (3,1), bs512 last',
-		# 	'model': InceptionPrePostModel(
-		# 		in_channels=num_feat_channels,
-		# 		depth_fe=3,
-		# 		n_filters_fe=32,
-		# 		depth_pred=1,
-		# 		n_filters_pred=32,
-		# 		kernel_sizes=[3, 5, 9, 19],
-		# 		activation='gelu',
-		# 		dropout=.2
-		# 	),
-		# 	'load_path': '../trained_models/het_cls_v2/round1/version_0_bs512/checkpoints/epoch=83-last.ckpt'
-		# },
-		{   'name': 'Inception v1 (3,1), bs256',
-			'model': InceptionPrePostModel(
-				in_channels=num_feat_channels,
-				depth_fe=3,
-				n_filters_fe=32,
-				depth_pred=1,
-				n_filters_pred=32,
-				kernel_sizes=[3, 5, 9, 19],
-				activation='gelu',
-				dropout=.2
-			),
-			'load_path': '../trained_models/het_cls_v2/round1/version_1/checkpoints/epoch=25-best_val_loss.ckpt'
-		},
-		# {   'name': 'Inception v1 (3,1), bs256 last',
-		# 	'model': InceptionPrePostModel(
-		# 		in_channels=num_feat_channels,
-		# 		depth_fe=3,
-		# 		n_filters_fe=32,
-		# 		depth_pred=1,
-		# 		n_filters_pred=32,
-		# 		kernel_sizes=[3, 5, 9, 19],
-		# 		activation='gelu',
-		# 		dropout=.2
-		# 	),
-		# 	'load_path': '../trained_models/het_cls_v2/round1/version_1/checkpoints/epoch=75-last.ckpt'
-		# },
-		{   'name': 'Inception v1 (6,3), bs256',
-			'model': InceptionPrePostModel(
-				in_channels=num_feat_channels,
-				depth_fe=6,
-				n_filters_fe=32,
-				depth_pred=3,
-				n_filters_pred=32,
-				kernel_sizes=[3, 5, 9, 19],
-				activation='gelu',
-				dropout=.2
-			),
-			'load_path': '../trained_models/het_cls_v2/round1/version_2/checkpoints/epoch=29-best_val_loss.ckpt'
-		},
-		# {   'name': 'Inception v1 (6,3), bs256 last',
-		# 	'model': InceptionPrePostModel(
-		# 		in_channels=num_feat_channels,
-		# 		depth_fe=6,
-		# 		n_filters_fe=32,
-		# 		depth_pred=3,
-		# 		n_filters_pred=32,
-		# 		kernel_sizes=[3, 5, 9, 19],
-		# 		activation='gelu',
-		# 		dropout=.2
-		# 	),
-		# 	'load_path': '../trained_models/het_cls_v2/round1/version_2/checkpoints/epoch=79-last.ckpt'
-		# },
-		{   'name': 'Inception v1 (6,3), bs256',
-			'model': InceptionPrePostModel(
-				in_channels=num_feat_channels,
-				depth_fe=6,
-				n_filters_fe=32,
-				depth_pred=3,
-				n_filters_pred=32,
-				kernel_sizes=[3, 5, 9, 19],
-				activation='gelu',
-				dropout=.2
-			),
-			'load_path': '../trained_models/het_cls_v2/round1/version_2/checkpoints/epoch=29-best_val_loss.ckpt'
-		},
-		# {   'name': 'Inception v1 (6,3), bs256 last',
-		# 	'model': InceptionPrePostModel(
-		# 		in_channels=num_feat_channels,
-		# 		depth_fe=6,
-		# 		n_filters_fe=32,
-		# 		depth_pred=3,
-		# 		n_filters_pred=32,
-		# 		kernel_sizes=[3, 5, 9, 19],
-		# 		activation='gelu',
-		# 		dropout=.2
-		# 	),
-		# 	'load_path': '../trained_models/het_cls_v2/round1/version_2/checkpoints/epoch=79-last.ckpt'
-		# },
-		{   'name': 'Inception v1 (6,3), bs256 do.3',
-			'model': InceptionPrePostModel(
-				in_channels=num_feat_channels,
-				depth_fe=6,
-				n_filters_fe=32,
-				depth_pred=3,
-				n_filters_pred=32,
-				kernel_sizes=[3, 5, 9, 19],
+				kernel_sizes=[5, 9, 19],
 				activation='gelu',
 				dropout=.3
 			),
-			'load_path': '../trained_models/het_cls_v2/round1/version_5/checkpoints/epoch=80-best_val_loss.ckpt'
+			'load_path': '../trained_models/het_cls_v2/round3/V2_1/version_0/checkpoints/epoch=47-best_val_loss.ckpt'
 		},
-		{   'name': 'Inception v1 (6,3), bs256 do.3 last',
+		{   'name': 'Inception 1 ((5,64),(2,64)) [5,9,19]',
 			'model': InceptionPrePostModel(
 				in_channels=num_feat_channels,
-				depth_fe=6,
-				n_filters_fe=32,
-				depth_pred=3,
-				n_filters_pred=32,
-				kernel_sizes=[3, 5, 9, 19],
+				depth_fe=5,
+				n_filters_fe=64,
+				depth_pred=2,
+				n_filters_pred=64,
+				kernel_sizes=[5, 9, 19],
 				activation='gelu',
 				dropout=.3
 			),
-			'load_path': '../trained_models/het_cls_v2/round1/version_5/checkpoints/epoch=124-last.ckpt'
+			'load_path': '../trained_models/het_cls_v2/round3/V2_1/version_1/checkpoints/epoch=65-best_val_loss.ckpt'
+		},
+		{   'name': 'Inception 2 ((5,64),(2,64)) [5,9,19] ws256',
+			'model': InceptionPrePostModel(
+				in_channels=num_feat_channels,
+				depth_fe=5,
+				n_filters_fe=64,
+				depth_pred=2,
+				n_filters_pred=64,
+				kernel_sizes=[5, 9, 19],
+				activation='gelu',
+				dropout=.3
+			),
+			'load_path': '../trained_models/het_cls_v2/round3/V2_1/version_2/checkpoints/epoch=15-best_val_loss.ckpt'
+		},
+		{   'name': 'Inception 3 ((5,64),(2,64)) [5,9,19] lr1e-5',
+			'model': InceptionPrePostModel(
+				in_channels=num_feat_channels,
+				depth_fe=5,
+				n_filters_fe=64,
+				depth_pred=2,
+				n_filters_pred=64,
+				kernel_sizes=[5, 9, 19],
+				activation='gelu',
+				dropout=.3
+			),
+			'load_path': '../trained_models/het_cls_v2/round3/V2_1/version_3/checkpoints/epoch=22-best_val_loss.ckpt'
+		},
+		{   'name': 'Inception 4 ((5,64),(2,64)) [5,9,19] lr1e-3',
+			'model': InceptionPrePostModel(
+				in_channels=num_feat_channels,
+				depth_fe=5,
+				n_filters_fe=64,
+				depth_pred=2,
+				n_filters_pred=64,
+				kernel_sizes=[5, 9, 19],
+				activation='gelu',
+				dropout=.3
+			),
+			'load_path': '../trained_models/het_cls_v2/round3/V2_1/version_4/checkpoints/epoch=12-best_val_loss.ckpt'
 		},
 	]
 
@@ -229,7 +352,7 @@ if __name__ == '__main__':
 		res_dict['ROC_auc'] = auc(res_dict['ROC_fpr'], res_dict['ROC_tpr'])
 
 		res_dict['PR_prec'], res_dict['PR_recall'], _ = precision_recall_curve(
-			y_true.int().numpy(), y_pred.numpy()
+			y_true.int().numpy(), y_pred.numpy(), #pos_label=0
 		)
 		res_dict['PR_auc'] = auc(res_dict['PR_recall'], res_dict['PR_prec'])
 		
@@ -261,7 +384,7 @@ if __name__ == '__main__':
 	ax_pr.legend(loc='lower left')
 	fig.tight_layout()
 
-	fig.savefig('../trained_models/het_cls_v2/round1/roc_pr.png',
+	fig.savefig('../trained_models/het_cls_v2/round3/V2_1/roc_pr.png',
 				bbox_inches='tight')
 	plt.close(fig)
 
@@ -283,7 +406,7 @@ if __name__ == '__main__':
 	axs[0].set_ylabel("True")
 	axs[0].set_xlabel("Pred")
 	# fig.tight_layout()
-	fig.savefig('../trained_models/het_cls_v2/round1/CMs.png',
+	fig.savefig('../trained_models/het_cls_v2/round3/V2_1/CMs.png',
 				bbox_inches='tight')
 	plt.close(fig)
 
@@ -298,6 +421,6 @@ if __name__ == '__main__':
 	table['class_recall_0'] = [s[0].item() for s in table.class_recall]
 	table['class_recall_1'] = [s[1].item() for s in table.class_recall]
 	table = table.drop(columns=['class_precision', 'class_recall'])
-	table.to_csv('../trained_models/het_cls_v2/round1/table.csv')
+	table.to_csv('../trained_models/het_cls_v2/round3/V2_1/table.csv')
 
 	print(table)
