@@ -17,7 +17,7 @@ from prepost_models import *
 class STRPrePostClassifier(pl.LightningModule):
 	def __init__(self, model, pos_weight=None, learning_rate=1e-3,
 			reduce_lr_on_plateau=False, reduce_lr_factor=0.1, patience=10,
-			bert=False, fe_learning_rate=1e-5):
+			bert=False, fe_learning_rate=1e-5, training_params={}):
 		super().__init__()
 		self.model = model
 		self.pos_weight = pos_weight
@@ -29,7 +29,8 @@ class STRPrePostClassifier(pl.LightningModule):
 		self.fe_learning_rate = fe_learning_rate
 
 		self.save_hyperparameters('learning_rate', 'pos_weight', 
-			'reduce_lr_on_plateau', 'reduce_lr_factor', 'patience')
+			'reduce_lr_on_plateau', 'reduce_lr_factor', 'patience',
+			'training_params')
 
 		# Metrics
 		metrics = MetricCollection([

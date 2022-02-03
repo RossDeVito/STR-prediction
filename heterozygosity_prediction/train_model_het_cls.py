@@ -23,7 +23,7 @@ if __name__ == '__main__':
 		'incl_STR_feat': True,
 		'min_boundary_STR_pos': 6,
 		'max_boundary_STR_pos': 6,
-		'window_size': 64,
+		'window_size': 128,
 		'bp_dist_units': 1000.0,
 		'split_name': 'split_1',
 
@@ -38,26 +38,26 @@ if __name__ == '__main__':
 		'early_stopping_patience': 50,
 
 		# Model params
-		'model_type': 'InceptionPreDimRedPost',#'InceptionPrePostModel',
-		'depth_fe': 5,
+		'model_type': 'InceptionPrePostModel',#'InceptionPreDimRedPost',
+		'depth_fe': 11,
 		'n_filters_fe': 32,
-		'depth_pred': 2,
+		'depth_pred': 3,
 		'n_filters_pred': 32,
-		'kernel_sizes': [5, 7, 11],
+		'kernel_sizes': [3, 5, 7, 9, 13, 21],#[5, 9, 19],
 		'activation': 'gelu',
 		'dropout': 0.25,
 
 		# for InceptionPreDimRedPost
 		'reduce_to': 16,
 		'pool_size': 2,
-		'kernel_sizes_pred': [5, 7, 9],
-		'dropout_dense': 0.2,
-		'dense_layer_sizes': [128],
+		'kernel_sizes_pred': [5, 9, 15],
+		'dropout_dense': 0.35,
+		'dense_layer_sizes': [128, 32],
 	}
 	num_workers_per_loader = 3
 
 	task_log_dir = 'het_cls_logs'
-	model_log_dir = 'V2_1_T_testing'
+	model_log_dir = 'V2_1'
 	if platform.system() == 'Darwin':
 		num_gpus = 0
 		print("Running on MacOS, setting num_gpus to 0")
@@ -120,7 +120,8 @@ if __name__ == '__main__':
 		reduce_lr_on_plateau=training_params['reduce_lr_on_plateau'],
 		reduce_lr_factor=training_params['reduce_lr_factor'],
 		patience=training_params['lr_reduce_patience'],
-		pos_weight=training_params['pos_weight']
+		pos_weight=training_params['pos_weight'],
+		training_params=training_params
 	)
 	training_params['model_n_params'] = count_params(model)
 	print(training_params['model_n_params'])

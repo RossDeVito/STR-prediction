@@ -32,27 +32,27 @@ if __name__ == '__main__':
 		'reduce_lr_on_plateau': True,
 		'reduce_lr_factor': 0.5,
 		'lr_reduce_patience': 20,
-		'pos_weight': .7,
+		'pos_weight': None,
 
 		# Callbacks
-		'early_stopping_patience': 50,
+		'early_stopping_patience': 100,
 
 		# Model params
 		'model_type': 'InceptionPreDimRedPost',#'InceptionPrePostModel',
-		'depth_fe': 4,
-		'n_filters_fe': 32,
-		'depth_pred': 1,
-		'n_filters_pred': 32,
-		'kernel_sizes': [5, 7, 11],#[3, 5, 7, 9, 13],
+		'depth_fe': 7,
+		'n_filters_fe': 64,
+		'depth_pred': 2,
+		'n_filters_pred': 64,
+		'kernel_sizes': [5, 9, 15],#[3, 5, 7, 9, 13],
 		'activation': 'gelu',
-		'dropout': 0.2,
+		'dropout': 0.3,
 
 		# for InceptionPreDimRedPost
 		'reduce_to': 16,
 		'pool_size': 2,
 		'kernel_sizes_pred': [5, 7, 9],
-		'dropout_dense': 0.2,
-		'dense_layer_sizes': [128],
+		'dropout_dense': 0.3,
+		'dense_layer_sizes': [64],
 	}
 	num_workers_per_loader = 3
 
@@ -120,7 +120,8 @@ if __name__ == '__main__':
 		reduce_lr_on_plateau=training_params['reduce_lr_on_plateau'],
 		reduce_lr_factor=training_params['reduce_lr_factor'],
 		patience=training_params['lr_reduce_patience'],
-		pos_weight=training_params['pos_weight']
+		pos_weight=training_params['pos_weight'],
+		training_params=training_params
 	)
 	training_params['model_n_params'] = count_params(model)
 	print(training_params['model_n_params'])
