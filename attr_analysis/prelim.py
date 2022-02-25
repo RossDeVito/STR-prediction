@@ -110,7 +110,7 @@ if __name__ == '__main__':
 	# Add bin label
 	meta_df['pred_bin'] = (meta_df['pred'] > .5).astype(int)
 
-	# Look at non-het correct preds
+	# Look at correct preds
 	correct_df = meta_df[meta_df['label'] == meta_df['pred_bin']]
 	non_het_df = correct_df[correct_df['label'] == 0]
 	het_df = correct_df[correct_df['label'] == 1]
